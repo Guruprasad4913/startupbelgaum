@@ -2,25 +2,20 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  Zap,
   FolderHeart,
   Sparkles,
   TrendingUp,
   Award,
   Download,
   Trash2,
-  ExternalLink,
   Search,
   Plus,
   Scale,
   MapPin,
   Calendar,
-  Layers,
-  Building,
   CheckCircle2,
   ArrowRight,
   RefreshCw,
-  Target,
   Briefcase,
   BarChart3,
   ChevronDown,
@@ -29,7 +24,6 @@ import {
   Coins,
   Globe,
   Lock,
-  ShieldCheck,
   Bell,
   Mail,
 } from "lucide-react";

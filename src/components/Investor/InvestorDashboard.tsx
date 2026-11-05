@@ -6,40 +6,23 @@ import {
   Coins,
   ShieldCheck,
   Award,
-  Sparkles,
-  Building,
   MapPin,
-  Scale,
   Search,
   ChevronRight,
   Calculator,
   Briefcase,
   Star,
-  ExternalLink,
   Zap,
-  Layers,
-  ArrowRight,
   Filter,
-  IndianRupee,
-  Activity,
   CheckCircle2,
   RefreshCw,
-  FolderHeart,
-  BarChart3,
   Flame,
   Globe2,
-  PieChart as PieIcon,
   Percent,
   FileText,
-  Mail,
 } from "lucide-react";
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   Cell,
   PieChart,
@@ -104,19 +87,15 @@ export const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
   }, [savedProjects]);
 
   // Extract unique domains and locations for filter pills
-  const { domainsList, locationsList } = useMemo(() => {
+  const { domainsList } = useMemo(() => {
     const dSet = new Set<string>();
-    const lSet = new Set<string>();
 
     allProjects.forEach((p) => {
       if (p.selectedIdea?.domain) dSet.add(p.selectedIdea.domain);
-      const loc = p.targetLocation?.city || p.founderProfile?.targetLocation?.city;
-      if (loc) lSet.add(loc);
     });
 
     return {
       domainsList: Array.from(dSet),
-      locationsList: Array.from(lSet),
     };
   }, [allProjects]);
 

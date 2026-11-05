@@ -11,7 +11,6 @@ interface GlobalWithMongo {
 declare const global: GlobalWithMongo;
 
 let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
 
 function getClientPromise(uri: string = DEFAULT_URI): Promise<MongoClient> {
   if (process.env.NODE_ENV === "development") {

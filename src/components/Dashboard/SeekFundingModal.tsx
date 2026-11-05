@@ -5,11 +5,7 @@ import {
   X,
   Coins,
   IndianRupee,
-  TrendingUp,
   ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
-  Sparkles,
   ArrowRight,
   Globe,
   Lock,
@@ -156,6 +152,13 @@ export const SeekFundingModal: React.FC<SeekFundingModalProps> = ({
 
         {/* Modal Form Body */}
         <form onSubmit={handleSave} className="p-6 overflow-y-auto flex-1 space-y-5 text-left">
+          {showSuccessToast && (
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+              <span>Investment parameters updated and synchronized to Cloud Vault successfully!</span>
+            </div>
+          )}
+
           {/* Permission Toggle: Allow on Investor Page */}
           <div
             className={`p-4 rounded-2xl border transition-all ${

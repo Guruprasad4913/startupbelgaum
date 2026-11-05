@@ -9,6 +9,12 @@ import {
   BusinessRoadmap,
   ScoringEngineBreakdown,
 } from "@/types";
+import {
+  getBelagaviCompetitorsBySector,
+  resolveSectorKey,
+  filterBelagaviCompetitors,
+  BELAGAVI_LOCATION,
+} from "@/lib/belagavi-data";
 
 interface GeminiOptions {
   apiKey?: string;
@@ -19,45 +25,203 @@ interface GeminiOptions {
   offset?: number;
 }
 
+// High-performance server-side in-memory cache to make report generation near-instant
+const memoryCache = {
+  validation: new Map<string, { data: MarketValidation; exp: number }>(),
+  feasibility: new Map<string, { data: FeasibilityReport; exp: number }>(),
+  ideas: new Map<string, { data: StartupIdea[]; exp: number }>(),
+};
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+function getCached<T>(map: Map<string, { data: T; exp: number }>, key: string): T | null {
+  const item = map.get(key);
+  if (item && item.exp > Date.now()) {
+    return item.data;
+  }
+  return null;
+}
+
+function setCache<T>(map: Map<string, { data: T; exp: number }>, key: string, data: T) {
+  if (map.size > 200) {
+    const firstKey = map.keys().next().value;
+    if (firstKey) map.delete(firstKey);
+  }
+  map.set(key, { data, exp: Date.now() + CACHE_TTL_MS });
+}
+
 // Fallback high-fidelity smart generator covering multiple domains
 export async function generateStartupIdeas(
   profile: FounderProfile,
   options?: GeminiOptions
 ): Promise<StartupIdea[]> {
+  const cacheKey = `${profile.domains.slice().sort().join(",")}_${profile.businessType}_${profile.targetAudience}_${options?.offset || 0}_${(options?.existingIdeas || []).length}_${profile.customContext || ""}`;
+  const cached = getCached(memoryCache.ideas, cacheKey);
+  if (cached) return cached;
+
   const apiKey = options?.apiKey || process.env.GEMINI_API_KEY;
 
   if (apiKey) {
     try {
       const ideas = await callGeminiForIdeas(profile, apiKey, options?.existingIdeas, options?.offset);
       if (ideas && ideas.length > 0) {
-        return ideas;
+        // Enforce strict sector consistency: All ideas must match the founder's requested domain
+        const targetSector = resolveSectorKey(
+          `${profile.domains.join(" ")} ${profile.businessType || ""}`,
+          profile.businessType
+        );
+        const alignedIdeas = ideas.filter((i) => {
+          const ideaSector = resolveSectorKey(`${i.domain} ${i.businessType || ""}`, i.businessType, i.tags);
+          return ideaSector === targetSector;
+        });
+
+        // Always guarantee at least 3 ideas strictly in targetSector
+        let finalIdeas = [...alignedIdeas];
+        if (finalIdeas.length < 3) {
+          const backupIdeas = generateIntelligentIdeas(profile, options?.offset || 0, [
+            ...(options?.existingIdeas || []),
+            ...finalIdeas.map((fi) => fi.name),
+          ]);
+          for (const backup of backupIdeas) {
+            if (finalIdeas.length >= 3) break;
+            const backupSector = resolveSectorKey(backup.domain, backup.businessType, backup.tags);
+            if (
+              backupSector === targetSector &&
+              !finalIdeas.some((fi) => fi.name.toLowerCase() === backup.name.toLowerCase())
+            ) {
+              finalIdeas.push(backup);
+            }
+          }
+        }
+
+        if (finalIdeas.length > 0) {
+          setCache(memoryCache.ideas, cacheKey, finalIdeas);
+          return finalIdeas;
+        }
       }
     } catch (err) {
-      console.warn("Gemini API call failed, falling back to intelligent built-in generator:", err);
+      console.warn("Gemini API call timed out or failed, using instant intelligent generator:", err);
     }
   }
 
   // Built-in intelligent idea generator with diversity and alternative options support
-  return generateIntelligentIdeas(profile, options?.offset || 0, options?.existingIdeas || []);
+  const result = generateIntelligentIdeas(profile, options?.offset || 0, options?.existingIdeas || []);
+  setCache(memoryCache.ideas, cacheKey, result);
+  return result;
 }
 
 export async function validateMarketIdea(
   idea: StartupIdea,
-  profile: FounderProfile,
+  profile?: FounderProfile | null,
   options?: GeminiOptions
 ): Promise<MarketValidation> {
+  const safeProfile = profile || {
+    domains: [idea.domain],
+    businessType: idea.businessType || "Commercial Venture",
+    interests: [idea.domain],
+    skills: ["Management"],
+    targetAudience: "Customers",
+    budget: "₹10,00,000",
+    timeframe: "1-3 Months",
+    customContext: idea.problemStatement || "",
+    targetArea: "Tilakwadi / Congress Rd",
+    targetLocation: BELAGAVI_LOCATION,
+  };
+
+  const isBelagavi =
+    !safeProfile.targetLocation ||
+    (safeProfile.targetLocation.city || "").toLowerCase().includes("belagavi") ||
+    Boolean(safeProfile.targetArea && safeProfile.targetArea.length > 0);
+
+  const resolvedArea = safeProfile.targetArea || safeProfile.targetLocation?.city || "all";
+  const sectorQuery = `${idea.domain} ${idea.businessType || ""} ${(idea.tags || []).join(" ")}`;
+
+  const cacheKey = `${idea.id || idea.name}_${idea.domain}_${resolvedArea}_${options?.tavilyContext ? "tavily" : "direct"}`;
+  const cached = getCached(memoryCache.validation, cacheKey);
+  if (cached) return cached;
+
   const apiKey = options?.apiKey || process.env.GEMINI_API_KEY;
+  let validationResult: MarketValidation | null = null;
 
   if (apiKey) {
     try {
-      const val = await callGeminiForValidation(idea, profile, apiKey, options?.tavilyContext);
-      if (val) return val;
+      const val = await callGeminiForValidation(idea, safeProfile, apiKey, options?.tavilyContext);
+      if (val) {
+        validationResult = val;
+      }
     } catch (err) {
-      console.warn("Gemini validation call failed, falling back to intelligent generator:", err);
+      console.warn("Gemini validation timed out or failed, using instant intelligent generator:", err);
     }
   }
 
-  return generateIntelligentValidation(idea, profile, options?.tavilyContext);
+  if (!validationResult) {
+    validationResult = generateIntelligentValidation(idea, safeProfile, options?.tavilyContext);
+  }
+
+  // GROUNDING: Always strictly populate competitors with the actual Belagavi rivals for that domain & selected locality!
+  if (isBelagavi && validationResult) {
+    const resolvedSector = resolveSectorKey(
+      idea.domain || (safeProfile.domains && safeProfile.domains[0]) || "",
+      idea.businessType || safeProfile.businessType || "",
+      idea.tags
+    );
+    const bComps = filterBelagaviCompetitors(resolvedSector, resolvedArea).competitors;
+    if (bComps && bComps.length > 0) {
+      validationResult.competitors = bComps.map((c) => ({
+        name: c.name,
+        brand: c.brand,
+        type: c.type,
+        strengths: c.strengths,
+        weaknesses: c.weaknesses,
+        ourDifferentiation: c.ourDifferentiation,
+        fundingOrScale: c.fundingOrScale,
+        address: c.address,
+        locality: c.locality,
+        lat: c.lat,
+        lng: c.lng,
+        isDirectAreaMatch: c.isDirectAreaMatch,
+        distanceKm: c.distanceKm,
+        nearbyAreaImpactNote: c.nearbyAreaImpactNote,
+        areaId: c.areaId,
+      }));
+
+      // Update comparison matrix with real Belagavi competitors
+      validationResult.competitorComparisonMatrix = {
+        features: [
+          "Local Footprint & Catchment",
+          "Price Accessibility in Area",
+          "Digital Ordering & Experience",
+          "Turnkey Scalability",
+          "Customer Retention Moat",
+          "Certified Hygiene / Quality Standards",
+        ],
+        competitors: bComps.slice(0, 3).map((c) => ({
+          name: c.brand || c.name,
+          scores: {
+            "Local Footprint & Catchment": c.locality,
+            "Price Accessibility in Area": c.type === "Direct" ? "Direct Rival" : "Incumbent",
+            "Digital Ordering & Experience": false,
+            "Turnkey Scalability": false,
+            "Customer Retention Moat": "Legacy Word-of-Mouth",
+            "Certified Hygiene / Quality Standards": "Traditional",
+          },
+        })),
+        ourProduct: {
+          name: idea.name,
+          scores: {
+            "Local Footprint & Catchment": `Focused on ${resolvedArea}`,
+            "Price Accessibility in Area": "Superior Value & Margin",
+            "Digital Ordering & Experience": true,
+            "Turnkey Scalability": true,
+            "Customer Retention Moat": "AI & Subscription Moat",
+            "Certified Hygiene / Quality Standards": true,
+          },
+        },
+      };
+    }
+  }
+
+  setCache(memoryCache.validation, cacheKey, validationResult);
+  return validationResult;
 }
 
 export async function generateCloudFeasibility(
@@ -66,6 +230,10 @@ export async function generateCloudFeasibility(
   profile: FounderProfile,
   options?: GeminiOptions
 ): Promise<FeasibilityReport> {
+  const cacheKey = `${idea.id || idea.name}_${idea.domain}_${profile.budget || ""}_${profile.timeframe || ""}`;
+  const cached = getCached(memoryCache.feasibility, cacheKey);
+  if (cached) return cached;
+
   const apiKey = options?.apiKey || process.env.GEMINI_API_KEY;
 
   if (apiKey) {
@@ -86,14 +254,17 @@ export async function generateCloudFeasibility(
           if (!report.mvpRecommendation) report.mvpRecommendation = mvpRecommendation;
           if (!report.businessRoadmap) report.businessRoadmap = businessRoadmap;
         }
+        setCache(memoryCache.feasibility, cacheKey, report);
         return report;
       }
     } catch (err) {
-      console.warn("Gemini feasibility call failed, falling back to intelligent generator:", err);
+      console.warn("Gemini feasibility timed out or failed, using instant intelligent generator:", err);
     }
   }
 
-  return generateIntelligentFeasibility(idea, validation, profile);
+  const result = generateIntelligentFeasibility(idea, validation, profile);
+  setCache(memoryCache.feasibility, cacheKey, result);
+  return result;
 }
 
 // Helper to robustly extract and parse JSON from Gemini response
@@ -135,14 +306,14 @@ export function formatToRupees(val: string): string {
   return trimmed;
 }
 
-// Robust multi-model list with auto-fallback to handle demand spikes and model updates
+// Ultra-fast model prioritization with realistic timeout for reliable structured generation
 const GEMINI_MODELS = [
+  "gemini-3.5-flash-lite",
   "gemini-3.5-flash",
-  "gemini-3.8-flash",
-  "gemini-flash-latest",
+  "gemini-3.1-flash-lite",
 ];
 
-// Helper to execute Gemini generation across available models with fallback
+// Helper to execute Gemini generation across available models with reliable timeout
 async function callGeminiApi(
   prompt: string,
   apiKey: string,
@@ -150,8 +321,19 @@ async function callGeminiApi(
   temperature: number = 0.7
 ): Promise<string> {
   let lastError: any = null;
+  const globalDeadline = Date.now() + 16000; // 16s global limit
 
   for (const model of GEMINI_MODELS) {
+    const remainingTime = globalDeadline - Date.now();
+    if (remainingTime < 2000) {
+      // Out of time for another model attempt, fall back immediately to instant generator
+      break;
+    }
+
+    const perAttemptTimeout = Math.min(10000, remainingTime);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), perAttemptTimeout);
+
     try {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -165,8 +347,10 @@ async function callGeminiApi(
               temperature,
             },
           }),
+          signal: controller.signal,
         }
       );
+      clearTimeout(timeoutId);
 
       if (res.ok) {
         const data = await res.json();
@@ -176,16 +360,24 @@ async function callGeminiApi(
         }
       } else {
         const errText = await res.text();
-        console.warn(`Gemini model ${model} status ${res.status}:`, errText);
-        lastError = new Error(`Gemini ${model} error (${res.status}): ${errText}`);
+        console.warn(`Gemini model ${model} status ${res.status}:`, errText.slice(0, 150));
+        lastError = new Error(`Gemini ${model} error (${res.status})`);
       }
     } catch (err: any) {
-      console.warn(`Gemini model ${model} request error:`, err?.message || err);
-      lastError = err;
+      clearTimeout(timeoutId);
+      const isAbort = err?.name === "AbortError" || err?.message?.includes("aborted");
+      if (isAbort) {
+        console.log(`Gemini ${model} timed out; activating instant intelligent generator`);
+        lastError = err;
+        break;
+      } else {
+        console.warn(`Gemini model ${model} error:`, err?.message || err);
+        lastError = err;
+      }
     }
   }
 
-  throw lastError || new Error("All Gemini models failed to respond");
+  throw lastError || new Error("Gemini models timed out; falling back to instant intelligent engine");
 }
 
 // Gemini API Integration helper
@@ -224,9 +416,9 @@ The user has explicitly entered the following startup idea or problem statement:
    - domain: Set the domain to the authentic industry of the problem statement (e.g. if problem is solar cold storage rooms for agricultural mandis, domain must be "Manufacturing / Agriculture", even if input field was mismatched).
    - businessType: Authentic business model type for this solution.
 
-2. DOMAIN HARMONIZATION: If the user's Startup Idea / Problem Statement describes a specific commercial industry (e.g. rural agricultural cold storage, bamboo products, coffee roasting) that conflicts with the input domain (e.g. "Offline Education"), the PROBLEM STATEMENT TAKES COMPLETE PRECEDENCE. DO NOT force an awkward Frankenstein blend (e.g. do NOT create "solar cold storage schools for kids"). Build authentic, high-potential businesses solving the specified problem.
+2. DOMAIN HARMONIZATION: If the user's Startup Idea / Problem Statement describes a specific commercial industry (e.g. rural agricultural cold storage, bamboo products, coffee roasting) that conflicts with the input domain (e.g. "Offline Education"), the PROBLEM STATEMENT TAKES COMPLETE PRECEDENCE. DO NOT force an awkward Frankenstein blend. Build authentic, high-potential businesses solving the specified problem.
 
-3. Concepts #2 and #3 MUST ALSO directly relate to this exact domain and problem space (e.g. alternative operational angles, complementary services, or related sub-vertical business models solving the SAME industry problem). DO NOT jump to completely random, unrelated industries.
+3. STRICT DOMAIN LOCK: Concepts #2, #3, and #4 MUST ALSO strictly belong to the same authentic sector ("${profile.domains[0] || "Target Domain"}"). If Healthcare & Wellness was requested, ALL concepts must be Healthcare & Wellness. NEVER output construction, infrastructure, or unrelated ideas.
 ` : ""}
 
 ${existingIdeas && existingIdeas.length > 0 ? `
@@ -285,6 +477,11 @@ Domain: ${idea.domain}
 Business Model: ${idea.businessType || "Commercial Venture"}
 Problem: ${idea.problemStatement}
 Solution: ${idea.solution}
+Target Hub / City: Belagavi (Belgaum), Karnataka, India
+Target Neighborhood / Area in Belagavi: ${profile.targetArea || profile.targetLocation?.city || "Belagavi"}
+
+LOCALITY & COMPETITOR MANDATE:
+All market dynamics and competitors MUST be analyzed through the lens of Belagavi, Karnataka—specifically the neighborhood of "${profile.targetArea || profile.targetLocation?.city || "Belagavi"}" and surrounding industrial/educational corridors. Focus on real local competitors and alternatives operating in this territory rather than generic national mega-corporations.
 
 ${tavilyContext ? `LIVE WEB MARKET RESEARCH (GROUNDING SIGNALS FROM TAVILY SEARCH):
 ${tavilyContext}
@@ -550,6 +747,12 @@ function buildExactMatchIdeaFromProfile(
     tagline = "100% Biodegradable Compressed Plant Fiber Essentials & Tableware";
     effectiveDomain = "D2C Brands";
     effectiveBusinessType = "Physical Products / D2C";
+  } else if (cLower.includes("contrast") || cLower.includes("sauna") || cLower.includes("cold plunge") || cLower.includes("recovery studio") || cLower.includes("wellness") || cLower.includes("infrared")) {
+    name = "ReviveZone Contrast Lounge";
+    tagline = "Boutique Infrared Sauna, Cold Plunge Suites & Athletic Contrast Recovery Lounges";
+    effectiveDomain = "Healthcare & Wellness";
+    effectiveBusinessType = "Healthcare & Wellness";
+    effectiveAudience = "Everyday Athletes, Gym-Goers & Stressed Executives";
   } else if (cLower.includes("precast") || cLower.includes("fit-out")) {
     name = "ModuBuild Infra";
     tagline = "Factory-Precast Modular Panels & Turnkey Commercial Interior Contracting";
@@ -581,15 +784,25 @@ function buildExactMatchIdeaFromProfile(
     domain: effectiveDomain,
     businessType: effectiveBusinessType,
     problemStatement: context,
-    solution: `An operational, high-impact business model delivering turnkey delivery and specialized infrastructure addressing "${context.toLowerCase()}". Leverages founder execution strengths in ${skills}.`,
+    solution: (cLower.includes("sauna") || cLower.includes("contrast") || cLower.includes("recovery") || cLower.includes("infrared") || cLower.includes("wellness") || effectiveDomain.includes("Health"))
+      ? `A specialized wellness studio offering private contrast therapy suites, full-spectrum infrared saunas, hygienic chilled water immersion, and targeted athletic recovery memberships.`
+      : `An operational, high-impact business model delivering certified execution and specialized operations addressing "${context.toLowerCase()}". Leverages founder execution strengths in ${skills}.`,
     targetPersona: {
       title: effectiveAudience,
-      painPoints: [
-        "Severe operational losses and inefficiency in legacy options",
-        "Lack of modern, transparent, and direct service models",
-        "High distributor markups and fragmented quality standards",
-      ],
-      willingnessToPay: "₹2,50,000 - ₹5,00,000 / unit or ₹35,000/mo",
+      painPoints: (cLower.includes("sauna") || cLower.includes("contrast") || cLower.includes("recovery") || cLower.includes("infrared") || effectiveDomain.includes("Health"))
+        ? [
+            "Delayed post-workout muscle recovery and systemic inflammation",
+            "High stress, cognitive burnout, and chronic back tension",
+            "Lack of clean, private, non-clinical recovery suites outside elite athletic centers",
+          ]
+        : [
+            "Severe operational losses and inefficiency in legacy options",
+            "Lack of modern, transparent, and direct service models",
+            "High distributor markups and fragmented quality standards",
+          ],
+      willingnessToPay: (cLower.includes("sauna") || cLower.includes("contrast") || cLower.includes("recovery") || effectiveDomain.includes("Health"))
+        ? "₹1,200 per 45-min contrast session or ₹4,500/mo recovery membership"
+        : "₹2,50,000 - ₹5,00,000 / unit or ₹35,000/mo",
     },
     whyNow: "Shifting industry regulations, consumer demand for direct transparency, and localized supply chain modernization.",
     innovationMoat: `Proprietary operational agility, direct stakeholder relationships, and founder mastery in ${skills}.`,
@@ -1411,10 +1624,155 @@ function generateIntelligentIdeas(
   existingIdeas: string[] = []
 ): StartupIdea[] {
   const primaryDomain = profile.domains[0] || "Food & Beverage";
+  const domainOnly = (profile.domains.join(" ") + " " + (profile.businessType || "")).toLowerCase();
   const norm = (primaryDomain + " " + (profile.businessType || "") + " " + (profile.customContext || "")).toLowerCase();
   const userSkills = profile.skills.length > 0 ? profile.skills.join(" and ") : "Operational Execution & Leadership";
 
-  // 1. Food & Beverage / Cafes / Dining
+  // 1. HEALTHCARE CLINICS, WELLNESS & RECOVERY (Priority check to prevent "infrared" or "contrast" from triggering construction)
+  const isHealthcare =
+    domainOnly.includes("health") ||
+    domainOnly.includes("wellness") ||
+    domainOnly.includes("clinic") ||
+    domainOnly.includes("hospital") ||
+    domainOnly.includes("medical") ||
+    domainOnly.includes("therapy") ||
+    domainOnly.includes("ayurved") ||
+    norm.includes("contrast recovery") ||
+    norm.includes("sauna") ||
+    norm.includes("cold plunge") ||
+    norm.includes("longevity clinic");
+
+  if (isHealthcare) {
+    return selectDiverseIdeas([
+      {
+        id: "health-1",
+        name: "ReviveZone Recovery Studios",
+        tagline: "Neighborhood Contrast Therapy Lounges: Infrared Sauna & Cold Plunges",
+        domain: "Healthcare & Wellness",
+        businessType: "Healthcare & Wellness",
+        problemStatement: "Everyday athletes, gym-goers, and stressed professionals lack affordable, hygienic access to proven physical recovery modalities used by elite athletes.",
+        solution: "Walk-in modern recovery studios offering contrast therapy suites (filtration cold plunge + full-spectrum infrared sauna) and pneumatic compression boots.",
+        targetPersona: {
+          title: "Runners, gym-goers, desk workers with chronic back tension, and wellness enthusiasts",
+          painPoints: ["Muscle soreness and inflammation", "High stress and burnout", "Expensive country club spa fees"],
+          willingnessToPay: "₹1,200 per 45-min session or ₹4,500/mo unlimited recovery membership"
+        },
+        whyNow: "Mainstream consumer explosion of longevity and athletic recovery science backed by neurobiology research.",
+        innovationMoat: "Proprietary medical-grade ozone sanitization protocol and standardized modular studio buildouts.",
+        tags: ["Healthcare & Wellness", "Contrast Therapy", "Physical Studio", "Recovery"],
+        initialFeasibilityScore: 92
+      },
+      {
+        id: "health-2",
+        name: "VitaLife Longevity Clinics",
+        tagline: "Preventive Health Screening, Biomarker Optimization & Diagnostic Centers",
+        domain: "Healthcare & Wellness",
+        businessType: "Healthcare & Wellness",
+        problemStatement: "Traditional healthcare is purely reactive, treating diseases after diagnosis rather than intercepting metabolic decline 10 years earlier.",
+        solution: "A boutique preventive clinic offering comprehensive 120-biomarker blood panels, DEXA body scans, VO2 max testing, and physician-guided lifestyle plans.",
+        targetPersona: {
+          title: "Executives, founders, and proactive adults aged 30-65",
+          painPoints: ["Unnoticed metabolic syndrome", "Generic 5-minute doctor visits", "Conflicting wellness advice"],
+          willingnessToPay: "₹15,000 - ₹45,000 per annual diagnostic program"
+        },
+        whyNow: "Preventive health and longevity have shifted from fringe biohacking into the fastest-growing private healthcare category.",
+        innovationMoat: "Longitudinal health tracking protocols and direct integrations with specialized diagnostic reference labs.",
+        tags: ["Healthcare & Wellness", "Preventive Care", "Longevity Clinic", "Diagnostics"],
+        initialFeasibilityScore: 89
+      },
+      {
+        id: "health-3",
+        name: "LittleSteps Sensory Gym",
+        tagline: "Pediatric Sensory Development & Occupational Therapy Play Centers",
+        domain: "Healthcare & Wellness",
+        businessType: "Healthcare & Wellness",
+        problemStatement: "Parents of neurodiverse children (ADHD, sensory processing, autism) wait 6+ months for certified developmental therapy appointments.",
+        solution: "A joyful, non-clinical neighborhood sensory gym combining pediatric occupational therapists with purpose-built climbing and sensory integration equipment.",
+        targetPersona: {
+          title: "Parents of children aged 2-12, pediatricians, and inclusive schools",
+          painPoints: ["Clinical intimidating therapy rooms", "Long hospital waiting lists", "Exorbitant private consultation fees"],
+          willingnessToPay: "₹1,500 per guided session or ₹9,000/mo package"
+        },
+        whyNow: "Growing pediatric neurodevelopment awareness and parent demand for constructive, play-based therapeutic environments.",
+        innovationMoat: "Proprietary therapist training curriculum and insurance-reimbursable developmental progress metrics.",
+        tags: ["Healthcare & Wellness", "Pediatric Care", "Sensory Gym", "Occupational Therapy"],
+        initialFeasibilityScore: 87
+      }
+    ], "health", profile, existingIdeas);
+  }
+
+  // 2. OFFLINE EDUCATION & ACADEMIES
+  const isEducation =
+    domainOnly.includes("education") ||
+    domainOnly.includes("school") ||
+    domainOnly.includes("academy") ||
+    domainOnly.includes("coaching") ||
+    domainOnly.includes("stem") ||
+    domainOnly.includes("robotics") ||
+    domainOnly.includes("tuition") ||
+    norm.includes("k-12") ||
+    norm.includes("tutoring");
+
+  if (isEducation) {
+    return selectDiverseIdeas([
+      {
+        id: "edu-1",
+        name: "MakerSprint K-12 Labs",
+        tagline: "Hands-On K-12 Robotics, 3D Prototyping & STEM Maker Academy",
+        domain: "Offline Education",
+        businessType: "Offline Education & Sports",
+        problemStatement: "School students memorize theoretical science from textbooks without ever building real physical circuits, robots, or mechanical prototypes.",
+        solution: "A vibrant neighborhood maker space where kids aged 7-16 attend weekly project sprints building autonomous rovers, 3D printed gadgets, and IoT weather stations.",
+        targetPersona: {
+          title: "Parents of K-12 students seeking hands-on practical skills over rote memorization",
+          painPoints: ["Excessive passive screen time", "Rote theoretical school syllabus", "Lack of practical engineering exposure"],
+          willingnessToPay: "₹2,500 - ₹4,800 / month weekend membership"
+        },
+        whyNow: "NEP 2020 experiential learning mandates and booming parent investment in foundational STEM literacy.",
+        innovationMoat: "Modular project kits engineered in-house and gamified student engineering milestone badges.",
+        tags: ["Offline Education", "STEM Education", "Robotics Lab", "Maker Space"],
+        initialFeasibilityScore: 91
+      },
+      {
+        id: "edu-2",
+        name: "ElevateSkills Industrial Academy",
+        tagline: "Hands-On Precision CNC, Tool & Die & Industrial Automation Finishing School",
+        domain: "Offline Education",
+        businessType: "Offline Education & Sports",
+        problemStatement: "Engineering and diploma graduates remain unemployable due to lack of hands-on experience with modern 5-axis CNCs, PLC automation, and quality CMM tools.",
+        solution: "An intensive 8-week shop-floor bootcamp partnering directly with local manufacturing clusters to train and place certified CNC programmers and automation technicians.",
+        targetPersona: {
+          title: "Diploma holders, mechanical/electrical graduates, and industrial factory owners",
+          painPoints: ["Severe shortage of skilled machine operators", "Low starting salaries for untrained engineers", "High scrap rates from inexperienced hires"],
+          willingnessToPay: "₹28,000 - ₹45,000 per certification course (or employer-sponsored)"
+        },
+        whyNow: "Massive expansion of precision manufacturing corridors and automotive vendor investments requiring certified shop-floor machinists.",
+        innovationMoat: "Guaranteed hiring pipeline with 30+ regional manufacturing partners and live industrial machinery training rigs.",
+        tags: ["Offline Education", "Skill Development", "Industrial Training", "Vocational"],
+        initialFeasibilityScore: 90
+      },
+      {
+        id: "edu-3",
+        name: "CognitiveSpark NEET & JEE Foundation Coaching",
+        tagline: "Micro-Batch Foundation Coaching with Adaptive Diagnostic Analytics",
+        domain: "Offline Education",
+        businessType: "Offline Education & Sports",
+        problemStatement: "Mega-coaching factories pack 150 students into lecture halls, causing average and shy students to fall behind with zero individual doubt clearance.",
+        solution: "A premium micro-batch academy capped at 20 students per class, combining veteran faculty with weekly AI-assisted error diagnostic reports for parents.",
+        targetPersona: {
+          title: "Parents of 8th-12th standard students aiming for medical and engineering entrance exams",
+          painPoints: ["Impersonal mega coaching factories", "High student stress and depression", "Undiagnosed conceptual weaknesses"],
+          willingnessToPay: "₹65,000 - ₹1,20,000 / year"
+        },
+        whyNow: "Intense entrance competition paired with parent backlash against crowded coaching factories in favor of personalized micro-mentorship.",
+        innovationMoat: "Strict 20-student batch cap, 1-on-1 daily doubt clearance desks, and proprietary error-pattern tracking analytics.",
+        tags: ["Offline Education", "NEP Aligned", "Coaching Academy", "Entrance Prep"],
+        initialFeasibilityScore: 89
+      }
+    ], "education", profile, existingIdeas);
+  }
+
+  // 3. Food & Beverage / Cafes / Dining
   if (
     norm.includes("food") ||
     norm.includes("beverage") ||
@@ -1553,23 +1911,29 @@ function generateIntelligentIdeas(
     ], "d2c", profile, existingIdeas);
   }
 
-  // 3. Construction, Infrastructure, Real Estate & Building
-  if (
-    norm.includes("construct") ||
-    norm.includes("constuct") || // Handles typo "constuction"
-    norm.includes("build") ||
-    norm.includes("contract") ||
-    norm.includes("infra") ||
-    norm.includes("interior") ||
-    norm.includes("real estate") ||
-    norm.includes("mason") ||
-    norm.includes("cement") ||
-    norm.includes("brick") ||
-    norm.includes("renovat") ||
-    norm.includes("civil") ||
-    norm.includes("plumb") ||
-    norm.includes("architect")
-  ) {
+  // 5. Construction, Infrastructure, Real Estate & Building
+  const isConstruction =
+    (domainOnly.includes("construct") ||
+     domainOnly.includes("constuct") ||
+     domainOnly.includes("infrastructure") ||
+     domainOnly.includes("turnkey") ||
+     domainOnly.includes("building") ||
+     domainOnly.includes("precast") ||
+     domainOnly.includes("real estate") ||
+     domainOnly.includes("cement") ||
+     domainOnly.includes("masonry") ||
+     domainOnly.includes("renovation") ||
+     domainOnly.includes("civil") ||
+     norm.includes("precast") ||
+     norm.includes("modular wall") ||
+     norm.includes("interlocking paver") ||
+     norm.includes("interior fit-out") ||
+     norm.includes("heavy machinery") ||
+     norm.includes("civil contractor")) &&
+    !isHealthcare &&
+    !isEducation;
+
+  if (isConstruction) {
     return selectDiverseIdeas([
       {
         id: "build-1",
@@ -2245,7 +2609,6 @@ function generateIntelligentValidation(
   const isAgri = dLower.includes("agri") || dLower.includes("farm") || dLower.includes("hydroponic") || dLower.includes("crop");
   const isHealth = dLower.includes("health") || dLower.includes("wellness") || dLower.includes("clinic") || dLower.includes("recovery") || dLower.includes("therapy") || dLower.includes("gym");
   const isRetail = dLower.includes("retail") || dLower.includes("store") || dLower.includes("shop") || dLower.includes("pet");
-  const isService = dLower.includes("service") || dLower.includes("hospitality") || dLower.includes("tourism") || dLower.includes("fleet") || dLower.includes("event");
   const isClean = dLower.includes("clean") || dLower.includes("waste") || dLower.includes("solar") || dLower.includes("recycling");
   const isFintech = dLower.includes("fintech") || dLower.includes("finance");
   const isAgent = dLower.includes("agent") || dLower.includes("saas") || dLower.includes("software") || dLower.includes("cloud");
@@ -2537,59 +2900,89 @@ function generateIntelligentValidation(
     sam,
     som,
     cagr,
-    competitors: isNonTech
-      ? [
-          {
-            name: "Legacy commercial mass brands",
-            type: "Indirect",
-            strengths: "Decades-old distribution contracts, ubiquitous shelf presence, deep marketing budgets.",
-            weaknesses: "Ultra-processed or cheap synthetic materials, impersonal corporate brand perception, zero local connection.",
-            ourDifferentiation: "100% transparent direct sourcing, superior craftsmanship, zero harmful chemicals, and engaging modern community.",
-            fundingOrScale: "Public multi-billion conglomerates"
-          },
-          {
-            name: "Unorganized local street vendors & mom-and-pop shops",
-            type: "Direct",
-            strengths: "Low overhead, hyper-local neighborhood familiarity.",
-            weaknesses: "Inconsistent quality control, lack of sanitary or lab certifications, zero digital ordering or customer loyalty.",
-            ourDifferentiation: "Standardized clinical hygiene, certified organic ingredients, seamless digital ordering and membership rewards.",
-            fundingOrScale: "Single-outlet operators"
-          },
-          {
-            name: "Expensive luxury boutique brands",
-            type: "Direct",
-            strengths: "High aesthetic appeal, established aspirational status.",
-            weaknesses: "Exorbitant price tags with 5x markups, exclusionary vibe, limited accessibility.",
-            ourDifferentiation: "Accessible everyday luxury pricing, direct-to-consumer savings, and welcoming inclusive community spaces.",
-            fundingOrScale: "Regional chains / VC-backed niche brands"
-          }
-        ]
-      : [
-          {
-            name: "Legacy incumbent solutions (SAP, Oracle, or legacy point tools)",
-            type: "Indirect",
-            strengths: "Established distribution contracts, widespread enterprise lock-in.",
-            weaknesses: "Rigid on-prem architecture, lack of native modern AI reasoning, prohibitive implementation fees ($50k+).",
-            ourDifferentiation: "Zero-configuration self-serve onboarding, 10x faster deployment, modern API-first composability.",
-            fundingOrScale: "Public multi-billion conglomerates"
-          },
-          {
-            name: "First-generation AI wrappers",
-            type: "Direct",
-            strengths: "Fast initial market hype, viral launch traction.",
-            weaknesses: "Superficial prompt wrappers with no deep domain logic, zero data moats, frequent hallucinations.",
-            ourDifferentiation: "Full-stack multi-agent verification, robust cloud telemetry, deterministic safety guardrails.",
-            fundingOrScale: "Seed / Pre-Series A ($2M - $5M raised)"
-          },
-          {
-            name: "In-house DIY Engineering Teams",
-            type: "Indirect",
-            strengths: "Tailored to exact internal company quirks.",
-            weaknesses: "High ongoing maintenance burden, distraction from core product, fragile custom codebases.",
-            ourDifferentiation: "Turnkey enterprise SLA, continuous compliance updates, 90% lower TCO (Total Cost of Ownership).",
-            fundingOrScale: "Internal Cost Centers"
-          }
-        ],
+    competitors: (() => {
+      const isBelagavi =
+        (loc.city || "").toLowerCase().includes("belagavi") ||
+        ((profile.targetLocation?.city || "").toLowerCase().includes("belagavi")) ||
+        Boolean(profile.targetArea);
+      if (isBelagavi) {
+        const areaTerm = profile.targetArea || loc.city || profile.targetLocation?.city || "all";
+        const resolvedSector = resolveSectorKey(
+          `${idea.domain} ${idea.businessType || ""} ${(profile.domains || []).join(" ")} ${profile.businessType || ""} ${idea.problemStatement || ""}`,
+          idea.businessType || profile.businessType,
+          idea.tags
+        );
+        const bComps = filterBelagaviCompetitors(resolvedSector, areaTerm).competitors;
+        if (bComps && bComps.length > 0) {
+          return bComps.map((c) => ({
+            name: c.name,
+            brand: c.brand,
+            type: c.type,
+            strengths: c.strengths,
+            weaknesses: c.weaknesses,
+            ourDifferentiation: c.ourDifferentiation,
+            fundingOrScale: c.fundingOrScale,
+            address: c.address,
+            locality: c.locality,
+            lat: c.lat,
+            lng: c.lng,
+          }));
+        }
+      }
+      return isNonTech
+        ? [
+            {
+              name: "Legacy commercial mass brands",
+              type: "Indirect",
+              strengths: "Decades-old distribution contracts, ubiquitous shelf presence, deep marketing budgets.",
+              weaknesses: "Ultra-processed or cheap synthetic materials, impersonal corporate brand perception, zero local connection.",
+              ourDifferentiation: "100% transparent direct sourcing, superior craftsmanship, zero harmful chemicals, and engaging modern community.",
+              fundingOrScale: "Public multi-billion conglomerates"
+            },
+            {
+              name: "Unorganized local street vendors & mom-and-pop shops",
+              type: "Direct",
+              strengths: "Low overhead, hyper-local neighborhood familiarity.",
+              weaknesses: "Inconsistent quality control, lack of sanitary or lab certifications, zero digital ordering or customer loyalty.",
+              ourDifferentiation: "Standardized clinical hygiene, certified organic ingredients, seamless digital ordering and membership rewards.",
+              fundingOrScale: "Single-outlet operators"
+            },
+            {
+              name: "Expensive luxury boutique brands",
+              type: "Direct",
+              strengths: "High aesthetic appeal, established aspirational status.",
+              weaknesses: "Exorbitant price tags with 5x markups, exclusionary vibe, limited accessibility.",
+              ourDifferentiation: "Accessible everyday luxury pricing, direct-to-consumer savings, and welcoming inclusive community spaces.",
+              fundingOrScale: "Regional chains / VC-backed niche brands"
+            }
+          ]
+        : [
+            {
+              name: "Legacy incumbent solutions (SAP, Oracle, or legacy point tools)",
+              type: "Indirect",
+              strengths: "Established distribution contracts, widespread enterprise lock-in.",
+              weaknesses: "Rigid on-prem architecture, lack of native modern AI reasoning, prohibitive implementation fees ($50k+).",
+              ourDifferentiation: "Zero-configuration self-serve onboarding, 10x faster deployment, modern API-first composability.",
+              fundingOrScale: "Public multi-billion conglomerates"
+            },
+            {
+              name: "First-generation AI wrappers",
+              type: "Direct",
+              strengths: "Fast initial market hype, viral launch traction.",
+              weaknesses: "Superficial prompt wrappers with no deep domain logic, zero data moats, frequent hallucinations.",
+              ourDifferentiation: "Full-stack multi-agent verification, robust cloud telemetry, deterministic safety guardrails.",
+              fundingOrScale: "Seed / Pre-Series A ($2M - $5M raised)"
+            },
+            {
+              name: "In-house DIY Engineering Teams",
+              type: "Indirect",
+              strengths: "Tailored to exact internal company quirks.",
+              weaknesses: "High ongoing maintenance burden, distraction from core product, fragile custom codebases.",
+              ourDifferentiation: "Turnkey enterprise SLA, continuous compliance updates, 90% lower TCO (Total Cost of Ownership).",
+              fundingOrScale: "Internal Cost Centers"
+            }
+          ];
+    })(),
     competitorComparisonMatrix,
     targetUserAnalysis,
     realTimeTrends: isNonTech
@@ -2685,7 +3078,6 @@ export function buildMvpAndRoadmap(
   const tf = (profile.timeframe || "").toLowerCase();
 
   const is2Week = tf.includes("2-week") || tf.includes("2 week") || tf.includes("14") || tf.includes("rapid mvp");
-  const is30Day = tf.includes("30-day") || tf.includes("30 day") || tf.includes("4-week") || tf.includes("4 week") || tf.includes("pilot launch");
   const is6Month = tf.includes("6 month") || tf.includes("enterprise") || tf.includes("24 week") || tf.includes("180");
 
   if (is2Week) {

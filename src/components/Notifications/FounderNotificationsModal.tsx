@@ -5,20 +5,12 @@ import {
   X,
   Bell,
   Coins,
-  Building,
   Mail,
-  Calendar,
-  CheckCircle2,
-  ExternalLink,
-  Sparkles,
   ArrowRight,
   Copy,
   Check,
-  Briefcase,
-  IndianRupee,
-  TrendingUp,
 } from "lucide-react";
-import { FounderNotification, StartupProject } from "@/types";
+import { FounderNotification } from "@/types";
 import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/notifications";
 
 interface FounderNotificationsModalProps {

@@ -2,20 +2,15 @@
 
 import React from "react";
 import {
-  Sparkles,
-  Cloud,
   Database,
-  Cpu,
   Settings,
   FolderHeart,
   Zap,
   Scale,
   ShieldCheck,
   LogOut,
-  User as UserIcon,
   HelpCircle,
   Coins,
-  TrendingUp,
   Bell,
 } from "lucide-react";
 import { User } from "@/types";

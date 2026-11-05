@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Sparkles,
   ArrowRight,
@@ -24,9 +24,14 @@ import {
   HardHat,
   Mail,
   HelpCircle,
+  MapPin,
+  Target,
+  ChevronRight,
 } from "lucide-react";
 import { FounderProfile, MapLocation, StartupIdea } from "@/types";
 import { GLOBAL_STARTUP_HUBS, DEFAULT_LOCATION } from "@/lib/location-data";
+import { BelagaviGoogleMap } from "@/components/BelagaviGoogleMap";
+import { BELAGAVI_LOCATION, BELAGAVI_AREAS, BELAGAVI_SECTORS, filterBelagaviCompetitors } from "@/lib/belagavi-data";
 
 interface StepInputProps {
   onGenerate: (profile: FounderProfile) => void;
@@ -267,10 +272,41 @@ export const StepInput: React.FC<StepInputProps> = ({
     initialProfile?.timeframe || ""
   );
 
-  // 7. Target Location / Hub
-  const [targetLocation, setTargetLocation] = useState<MapLocation | null>(
-    initialProfile?.targetLocation || null
+  // 7. Target Location / Hub - Defaults to Belagavi, Karnataka
+  const [targetLocation, setTargetLocation] = useState<MapLocation>(
+    initialProfile?.targetLocation || BELAGAVI_LOCATION
   );
+  // 8. Particular Area / Locality in Belagavi
+  const [belagaviArea, setBelagaviArea] = useState<string>(
+    initialProfile?.targetArea || "Tilakwadi / Congress Rd"
+  );
+  const [customBelagaviArea, setCustomBelagaviArea] = useState<string>("");
+  const [showBelagaviMap, setShowBelagaviMap] = useState<boolean>(true);
+  const [sectorFilter, setSectorFilter] = useState<"belagavi" | "all">("belagavi");
+
+  const resolvedBelagaviArea = customBelagaviArea.trim() || belagaviArea;
+
+  const activeSectorKey = useMemo((): "food" | "education" | "healthcare" | "construction" => {
+    const combined = `${selectedCategory} ${domainsInput} ${businessType} ${customContext}`.toLowerCase();
+    if (combined.includes("education") || combined.includes("edtech") || combined.includes("school") || combined.includes("college") || combined.includes("academy") || combined.includes("tutoring") || combined.includes("coaching") || combined.includes("learning")) {
+      return "education";
+    }
+    if (combined.includes("health") || combined.includes("wellness") || combined.includes("clinic") || combined.includes("hospital") || combined.includes("medical") || combined.includes("diagnostic") || combined.includes("pharma") || combined.includes("care")) {
+      return "healthcare";
+    }
+    if (combined.includes("construct") || combined.includes("infra") || combined.includes("building") || combined.includes("real estate") || combined.includes("turnkey") || combined.includes("contract") || combined.includes("precast") || combined.includes("cement") || combined.includes("civil") || combined.includes("property")) {
+      return "construction";
+    }
+    return "food";
+  }, [selectedCategory, domainsInput, businessType, customContext]);
+
+  const getBelagaviSectorKey = (catId: string): "food" | "education" | "healthcare" | "construction" => {
+    if (catId === "food") return "food";
+    if (catId === "education") return "education";
+    if (catId === "wellness") return "healthcare";
+    if (catId === "construction") return "construction";
+    return activeSectorKey;
+  };
 
   // Check if customContext matches another category preset while current selection differs
   const matchingCategory = INDUSTRY_CATEGORIES.find(
@@ -327,6 +363,7 @@ export const StepInput: React.FC<StepInputProps> = ({
       ? (customBusinessType.trim() || "Others / Custom Model")
       : (businessType || "Commercial Venture");
 
+    const finalArea = customBelagaviArea.trim() || belagaviArea;
     const profile: FounderProfile = {
       domains,
       skills,
@@ -336,7 +373,12 @@ export const StepInput: React.FC<StepInputProps> = ({
       budget: budget.trim() || "₹5,00,000 - ₹25,00,000",
       timeframe: timeframe.trim() || "1-3 Months Full Beta",
       customContext: customContext.trim(),
-      targetLocation: targetLocation || DEFAULT_LOCATION,
+      targetArea: finalArea,
+      targetLocation: {
+        ...(targetLocation || BELAGAVI_LOCATION),
+        city: finalArea.includes("All") ? "Belagavi (Belgaum)" : `Belagavi (${finalArea})`,
+        keyHubs: [finalArea, ...(BELAGAVI_LOCATION.keyHubs || [])],
+      },
       founderEmail: founderEmail.trim() || undefined,
     };
 
@@ -357,6 +399,7 @@ export const StepInput: React.FC<StepInputProps> = ({
       ? (customBusinessType.trim() || "Others / Custom Model")
       : (businessType || "Commercial Venture");
 
+    const finalArea = customBelagaviArea.trim() || belagaviArea;
     const profile: FounderProfile = {
       domains,
       skills,
@@ -366,7 +409,12 @@ export const StepInput: React.FC<StepInputProps> = ({
       budget: budget.trim() || "₹5,00,000 - ₹25,00,000",
       timeframe: timeframe.trim() || "1-3 Months Full Beta",
       customContext: customContext.trim(),
-      targetLocation: targetLocation || DEFAULT_LOCATION,
+      targetArea: finalArea,
+      targetLocation: {
+        ...(targetLocation || BELAGAVI_LOCATION),
+        city: finalArea.includes("All") ? "Belagavi (Belgaum)" : `Belagavi (${finalArea})`,
+        keyHubs: [finalArea, ...(BELAGAVI_LOCATION.keyHubs || [])],
+      },
       founderEmail: founderEmail.trim() || undefined,
     };
 
@@ -456,13 +504,39 @@ export const StepInput: React.FC<StepInputProps> = ({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
             <Compass className="w-4 h-4 text-blue-600" />
-            <span>Select Industry Sector (Tech &amp; Real-World Commercial)</span>
+            <span>Select Industry Sector</span>
           </label>
-          <span className="text-xs text-slate-500 font-medium">Click to auto-populate domain, skills &amp; problem template</span>
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+            <button
+              type="button"
+              onClick={() => setSectorFilter("belagavi")}
+              className={`px-3 py-1 rounded-lg font-bold text-xs transition cursor-pointer ${
+                sectorFilter === "belagavi"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Belagavi 4 Core Sectors
+            </button>
+            <button
+              type="button"
+              onClick={() => setSectorFilter("all")}
+              className={`px-3 py-1 rounded-lg font-medium text-xs transition cursor-pointer ${
+                sectorFilter === "all"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              All Industry Sectors
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {INDUSTRY_CATEGORIES.map((cat) => {
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {(sectorFilter === "belagavi"
+            ? INDUSTRY_CATEGORIES.filter((c) => ["food", "education", "wellness", "construction"].includes(c.id))
+            : INDUSTRY_CATEGORIES
+          ).map((cat) => {
             const Icon = cat.icon;
             const isSelected = selectedCategory === cat.id;
             return (
@@ -742,54 +816,155 @@ export const StepInput: React.FC<StepInputProps> = ({
             </div>
           </div>
 
-          {/* Target Launch Hub / Ecosystem */}
-          <div className="space-y-2 sm:col-span-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
-                <Globe2 className="w-3.5 h-3.5 text-amber-600" />
-                Target Launch Hub &amp; Geographic Market *
-              </label>
-              {targetLocation && (
-                <span className="text-[10px] text-emerald-800 font-mono font-semibold px-2 py-0.5 rounded bg-emerald-100 border border-emerald-300">
-                  Ecosystem Score: {targetLocation.ecosystemScore}/100
-                </span>
-              )}
+          {/* Target Launch Hub / Ecosystem with Free Google Maps Belagavi Competitor Radar */}
+          <div className="space-y-3 sm:col-span-2 bg-slate-50 p-4 sm:p-5 rounded-3xl border border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <Globe2 className="w-4 h-4 text-blue-600" />
+                  <span>Target Launch Hub: Belagavi (Belgaum), Karnataka</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                </label>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Configured for Belagavi Tier-2 ecosystem with live Google Map competitor telemetry across the 4 key sectors.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBelagaviMap(!showBelagaviMap)}
+                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer border ${
+                    showBelagaviMap
+                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                  }`}
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>{showBelagaviMap ? "Hide Google Map" : "Show Belagavi Google Map"}</span>
+                </button>
+              </div>
             </div>
-            <select
-              value={targetLocation?.city || ""}
-              onChange={(e) => {
-                const found = GLOBAL_STARTUP_HUBS.find((h) => h.city === e.target.value);
-                if (found) setTargetLocation(found);
-              }}
-              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition cursor-pointer shadow-sm"
-            >
-              <option value="" disabled className="text-slate-500">
-                Select target launch market / hub...
-              </option>
-              {GLOBAL_STARTUP_HUBS.map((hub) => (
-                <option key={hub.city} value={hub.city}>
-                  {hub.city}, {hub.country} (Score: {hub.ecosystemScore}/100)
-                </option>
-              ))}
-            </select>
-            {targetLocation ? (
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                <div className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] shadow-sm">
-                  <span className="text-slate-500 block text-[9px] uppercase font-mono">Talent Index</span>
-                  <span className="text-slate-900 font-semibold">{targetLocation.talentIndex}</span>
+
+            {/* Dedicated Belagavi Area / Neighborhood Input Selector */}
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-blue-200/90 shadow-sm space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-rose-600" />
+                  <span>Belagavi Specific Area / Locality *</span>
+                  <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-mono font-semibold">
+                    Launch Neighborhood
+                  </span>
+                </label>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Active Area: <strong className="text-blue-700">{resolvedBelagaviArea}</strong>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Area Dropdown */}
+                <div>
+                  <select
+                    value={belagaviArea}
+                    onChange={(e) => {
+                      setBelagaviArea(e.target.value);
+                      if (e.target.value !== "custom") {
+                        setCustomBelagaviArea("");
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-semibold focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition cursor-pointer shadow-sm"
+                  >
+                    {BELAGAVI_AREAS.filter((a) => a.id !== "all").map((a) => (
+                      <option key={a.id} value={a.name}>
+                        📍 {a.name} ({a.pincode})
+                      </option>
+                    ))}
+                    <option value="All Belagavi (Full City)">🌐 All Belagavi (Full City)</option>
+                    <option value="custom">✏️ Other Specific Street / Colony...</option>
+                  </select>
                 </div>
-                <div className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] shadow-sm">
-                  <span className="text-slate-500 block text-[9px] uppercase font-mono">VC Climate</span>
-                  <span className="text-slate-900 font-semibold">{targetLocation.vcFundingClimate}</span>
-                </div>
-                <div className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] shadow-sm">
-                  <span className="text-slate-500 block text-[9px] uppercase font-mono">Avg CAC</span>
-                  <span className="text-emerald-700 font-semibold">{targetLocation.avgCustomerAcquisitionCost}</span>
+
+                {/* Custom Area / Street Input */}
+                <div>
+                  <input
+                    type="text"
+                    value={customBelagaviArea}
+                    onChange={(e) => {
+                      setCustomBelagaviArea(e.target.value);
+                      if (belagaviArea !== "custom") {
+                        setBelagaviArea("custom");
+                      }
+                    }}
+                    placeholder={
+                      belagaviArea === "custom"
+                        ? "Type street / colony (e.g. Angol, Hindwadi 3rd Cross, Peeranwadi)..."
+                        : "Or type custom street / colony here..."
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition shadow-sm"
+                  />
                 </div>
               </div>
-            ) : (
-              <div className="text-[10px] text-slate-500">
-                Select an ecosystem hub to benchmark regional talent index, VC investment, and CAC
+
+              {/* Quick Area Shortcuts */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                <span className="text-[10px] text-slate-400 font-bold uppercase font-mono mr-1">Quick Select:</span>
+                {["Tilakwadi / Congress Rd", "Udyambag & Machhe", "Nehru Nagar / JNMC", "Camp & College Road", "Khade Bazar & Shahapur", "Kakati (NH-48 Belt)", "Sadashiv Nagar / Civil Hospital"].map((areaName) => (
+                  <button
+                    key={areaName}
+                    type="button"
+                    onClick={() => {
+                      setBelagaviArea(areaName);
+                      setCustomBelagaviArea("");
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition border cursor-pointer ${
+                      belagaviArea === areaName && !customBelagaviArea
+                        ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
+                    }`}
+                  >
+                    {areaName.split(" ")[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Metrics Bar for Belagavi */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <div className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] shadow-sm">
+                <span className="text-slate-500 block text-[9px] uppercase font-mono font-semibold">Territory</span>
+                <span className="text-slate-900 font-bold truncate block">{resolvedBelagaviArea}</span>
+              </div>
+              <div className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] shadow-sm">
+                <span className="text-slate-500 block text-[9px] uppercase font-mono font-semibold">Ecosystem Score</span>
+                <span className="text-emerald-700 font-bold">86/100 (Tier-2 Hub)</span>
+              </div>
+              <div className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] shadow-sm">
+                <span className="text-slate-500 block text-[9px] uppercase font-mono font-semibold">Talent Corridor</span>
+                <span className="text-slate-900 font-semibold truncate">VTU &amp; KLE Medical Hub</span>
+              </div>
+              <div className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] shadow-sm">
+                <span className="text-slate-500 block text-[9px] uppercase font-mono font-semibold">Est. CAC Range</span>
+                <span className="text-emerald-700 font-bold">₹2,500 - ₹5,800</span>
+              </div>
+            </div>
+
+            {/* Embedded Belagavi Google Maps (Map Only - Clean, no competitor cards during input) */}
+            {showBelagaviMap && (
+              <div className="pt-2 animate-in fade-in duration-300">
+                <BelagaviGoogleMap
+                  mapOnly={true}
+                  activeSector={activeSectorKey}
+                  initialArea={resolvedBelagaviArea}
+                  onAreaChange={(areaName) => {
+                    setBelagaviArea(areaName);
+                    setCustomBelagaviArea("");
+                    setTargetLocation((prev) => ({
+                      ...(prev || BELAGAVI_LOCATION),
+                      city: areaName.includes("All") ? "Belagavi (Belgaum)" : `Belagavi (${areaName})`,
+                      keyHubs: [areaName, ...(BELAGAVI_LOCATION.keyHubs || [])],
+                    }));
+                  }}
+                />
               </div>
             )}
           </div>

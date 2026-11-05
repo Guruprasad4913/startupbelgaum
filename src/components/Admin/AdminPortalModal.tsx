@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Shield,
   ShieldCheck,
   X,
   Users,
@@ -11,11 +10,8 @@ import {
   Trash2,
   RefreshCw,
   CheckCircle2,
-  AlertCircle,
   Activity,
   Server,
-  FileText,
-  Key,
   ExternalLink,
 } from "lucide-react";
 import { User, StartupProject } from "@/types";

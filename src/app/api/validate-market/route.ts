@@ -17,31 +17,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Valid startup idea is required." }, { status: 400 });
     }
 
-    // 1. Fetch live market signals & web research (via Tavily if key supplied, with graceful fallbacks)
-    let liveSignals: { trends: any[]; tavilyAnswer?: string; usedTavily: boolean } = {
-      trends: [],
-      tavilyAnswer: undefined,
-      usedTavily: false,
-    };
-    try {
-      liveSignals = await fetchLiveMarketSignals(
-        idea.domain,
-        idea.tags || [],
-        tavilyApiKey,
-        idea.name
-      );
-    } catch (e) {
-      console.warn("Live market signals fetch error:", e);
-    }
-
-    // 2. Generate market validation, grounded with Tavily web research if available
-    const validation = await validateMarketIdea(idea, profile, {
-      apiKey,
+    // 1. Run live market signals and validation concurrently for ultra-fast response
+    const signalsPromise = fetchLiveMarketSignals(
+      idea.domain,
+      idea.tags || [],
       tavilyApiKey,
-      tavilyContext: liveSignals.tavilyAnswer,
+      idea.name
+    ).catch((e) => {
+      console.warn("Live market signals fetch error:", e);
+      return { trends: [], tavilyAnswer: undefined, usedTavily: false };
     });
 
-    // 3. Attach Tavily indicators and verified citations
+    const validationPromise = validateMarketIdea(idea, profile, {
+      apiKey,
+      tavilyApiKey,
+    }).catch((e) => {
+      console.warn("Validation error:", e);
+      return null;
+    });
+
+    const [liveSignals, preliminaryValidation] = await Promise.all([
+      signalsPromise,
+      validationPromise,
+    ]);
+
+    let validation = preliminaryValidation;
+    if (!validation) {
+      validation = await validateMarketIdea(idea, profile, { apiKey });
+    }
+
+    // 2. Attach Tavily indicators and verified citations
     if (liveSignals.usedTavily) {
       validation.usedTavily = true;
       if (liveSignals.tavilyAnswer) {

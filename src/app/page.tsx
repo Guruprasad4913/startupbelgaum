@@ -32,27 +32,17 @@ import { FounderNotificationsModal } from "@/components/Notifications/FounderNot
 import { getLocationByCity } from "@/lib/location-data";
 import {
   Sparkles,
-  Radio,
-  Cloud,
-  FileText,
-  CheckCircle2,
   ChevronRight,
-  Rocket,
-  Milestone,
-  Scale,
-  Globe2,
-  Activity,
-  Award,
   ShieldCheck,
   FolderHeart,
   Coins,
   ArrowLeft,
+  Activity,
 } from "lucide-react";
 
 export default function Home() {
   // Authentication state (First page opens with Login/Sign-up/Admin unless signed in)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
   const [isAdminPortalOpen, setIsAdminPortalOpen] = useState<boolean>(false);
   const [adminView, setAdminView] = useState<"dashboard" | "wizard" | "investor">("dashboard");
   const [userView, setUserView] = useState<"reports" | "wizard" | "investor">("reports");
@@ -83,6 +73,42 @@ export default function Home() {
   const [loadingText, setLoadingText] = useState("");
   const [savedProjects, setSavedProjects] = useState<StartupProject[]>([]);
 
+  // Instant client-side report cache to eliminate repeat loading
+  const [clientValidationCache, setClientValidationCache] = useState<Record<string, MarketValidation>>({});
+  const [clientFeasibilityCache, setClientFeasibilityCache] = useState<Record<string, FeasibilityReport>>({});
+
+  // Loading sub-stages state for smooth progress display
+  const [loadingStageIndex, setLoadingStageIndex] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(25);
+
+  const loadingStages = [
+    { title: "TAM, SAM & SOM Market Sizing", subtitle: "Extracting regional industry volume & rupee valuations..." },
+    { title: "Competitor Intelligence & Moats", subtitle: "Benchmarking alternatives & live web signals..." },
+    { title: "Cloud Topologies & Cost Projections", subtitle: "Synthesizing serverless architecture & pricing tiers..." },
+    { title: "14-Stage Institutional Viability Index", subtitle: "Assembling verified venture memorandum..." },
+  ];
+
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingStageIndex(0);
+      setLoadingProgress(25);
+      return;
+    }
+
+    const stageInterval = setInterval(() => {
+      setLoadingStageIndex((prev) => (prev + 1) % 4);
+    }, 700);
+
+    const progressInterval = setInterval(() => {
+      setLoadingProgress((prev) => (prev >= 92 ? 95 : prev + Math.floor(Math.random() * 8 + 6)));
+    }, 350);
+
+    return () => {
+      clearInterval(stageInterval);
+      clearInterval(progressInterval);
+    };
+  }, [isLoading]);
+
   // Unread investor notification count
   const unreadNotifCount = React.useMemo(() => {
     return founderNotifications.filter((n) => !n.read).length;
@@ -112,6 +138,15 @@ export default function Home() {
   // Load user session, preferences, and saved vault items on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Unregister any stale service workers that may cache old initial pages
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+
       try {
         const rawUser = localStorage.getItem("startupgen_auth_user");
         if (rawUser) {
@@ -140,8 +175,6 @@ export default function Home() {
         }
       } catch (e) {
         console.warn("Session check error", e);
-      } finally {
-        setIsAuthChecking(false);
       }
 
       const savedKey = localStorage.getItem("startupgen_gemini_key") || "";
@@ -150,8 +183,6 @@ export default function Home() {
       setApiKey(savedKey);
       setTavilyApiKey(savedTavily);
       setCloudPreference(savedPref);
-    } else {
-      setIsAuthChecking(false);
     }
   }, []);
 
@@ -402,6 +433,15 @@ export default function Home() {
   const handleSelectIdeaAndValidate = async (idea: StartupIdea) => {
     if (!profile) return;
     setSelectedIdea(idea);
+
+    const cacheKey = `${idea.id || idea.name}_${idea.domain}_${profile.targetArea || ""}_${profile.targetLocation?.city || ""}`;
+    if (clientValidationCache[cacheKey]) {
+      setValidation(clientValidationCache[cacheKey]);
+      setCurrentStep(3);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     setIsLoading(true);
     setLoadingText(`Validating "${idea.name}" with Market Sizing, Competitor Matrix & User Personas...`);
 
@@ -415,6 +455,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to validate market");
 
+      setClientValidationCache((prev) => ({ ...prev, [cacheKey]: data.validation }));
       setValidation(data.validation);
       setCurrentStep(3);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -431,6 +472,15 @@ export default function Home() {
     setProfile(founderProfile);
     setIdeas([idea]);
     setSelectedIdea(idea);
+
+    const cacheKey = `${idea.id || idea.name}_${idea.domain}_${founderProfile.targetArea || ""}_${founderProfile.targetLocation?.city || ""}`;
+    if (clientValidationCache[cacheKey]) {
+      setValidation(clientValidationCache[cacheKey]);
+      setCurrentStep(3);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     setIsLoading(true);
     setLoadingText(`Directly validating "${idea.name}" with Market Sizing, Competitor Matrix & User Personas...`);
 
@@ -444,6 +494,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to validate market");
 
+      setClientValidationCache((prev) => ({ ...prev, [cacheKey]: data.validation }));
       setValidation(data.validation);
       setCurrentStep(3);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -458,6 +509,15 @@ export default function Home() {
   // Step 3 -> 4: Generate Cloud Feasibility Blueprint & Scoring Engine
   const handleProceedToCloudFeasibility = async () => {
     if (!profile || !selectedIdea || !validation) return;
+
+    const cacheKey = `${selectedIdea.id || selectedIdea.name}_${selectedIdea.domain}_${profile.budget || ""}`;
+    if (clientFeasibilityCache[cacheKey]) {
+      setFeasibility(clientFeasibilityCache[cacheKey]);
+      setCurrentStep(4);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     setIsLoading(true);
     setLoadingText("Constructing Cloud Topologies, Running AI Scoring Engine & Simulating Unit Economics...");
 
@@ -471,6 +531,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate cloud blueprint");
 
+      setClientFeasibilityCache((prev) => ({ ...prev, [cacheKey]: data.feasibility }));
       setFeasibility(data.feasibility);
       setCurrentStep(4);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -578,18 +639,6 @@ export default function Home() {
     setUserView("wizard");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // If loading session, show subtle spinner
-  if (isAuthChecking) {
-    return (
-      <div className="min-h-screen bg-[#f4f6fa] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-2 border-blue-500/20 border-t-blue-600 animate-spin" />
-          <div className="text-xs text-slate-500 font-mono">Initializing StartupGen...</div>
-        </div>
-      </div>
-    );
-  }
 
   // 1. If not authenticated, render Login / Sign-up / Admin Portal page first!
   if (!currentUser) {
@@ -932,17 +981,49 @@ export default function Home() {
               </div>
             )}
 
-            {/* Global Loading Overlay */}
+            {/* Ultra-Fast Multi-Stage Loading Overlay */}
             {isLoading && (
-              <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/85 backdrop-blur-md animate-in fade-in duration-200">
-                <div className="relative flex items-center justify-center mb-5">
-                  <div className="w-20 h-20 rounded-full border-4 border-blue-500/20 border-t-blue-600 animate-spin" />
-                  <div className="w-12 h-12 rounded-full bg-blue-500/10 absolute flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-blue-600 animate-pulse" />
+              <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/45 backdrop-blur-md animate-in fade-in duration-200 p-4">
+                <div className="w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#243d78] text-[11px] font-bold">
+                      <Sparkles className="w-3.5 h-3.5 animate-spin text-[#243d78]" />
+                      Turbo AI Engine Active
+                    </div>
+                    <span className="text-xs font-mono font-bold text-slate-500">
+                      {loadingProgress}%
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0 border border-blue-100">
+                      <div className="w-10 h-10 rounded-full border-2 border-blue-500/20 border-t-[#243d78] animate-spin absolute" />
+                      <Activity className="w-5 h-5 text-[#243d78] animate-pulse" />
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                      <h4 className="text-sm font-bold text-slate-900 truncate">
+                        {loadingStages[loadingStageIndex]?.title || "Synthesizing Institutional Validation"}
+                      </h4>
+                      <p className="text-xs text-slate-500 truncate">
+                        {loadingStages[loadingStageIndex]?.subtitle || "Extracting real-time market signals..."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60 p-0.5">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 rounded-full transition-all duration-300 ease-out"
+                        style={{ width: `${loadingProgress}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-slate-600 font-mono">
+                      <span>14-Stage Institutional Engine</span>
+                      <span className="text-emerald-700 font-bold">Ultra-fast (~2-4s)</span>
+                    </div>
                   </div>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">{loadingText}</h3>
-                <p className="text-xs text-slate-500 mt-1 font-mono">Synthesizing real-time market data &amp; cloud topologies...</p>
               </div>
             )}
 
@@ -973,6 +1054,7 @@ export default function Home() {
               <StepMarketValidation
                 idea={selectedIdea}
                 validation={validation}
+                profile={profile}
                 onNext={handleProceedToCloudFeasibility}
                 onBack={() => setCurrentStep(2)}
                 isEvaluatingCloud={isLoading}

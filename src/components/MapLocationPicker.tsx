@@ -5,13 +5,11 @@ import {
   MapPin,
   Globe2,
   TrendingUp,
-  Award,
   ShieldCheck,
   IndianRupee,
   Users,
   Compass,
   CheckCircle2,
-  Building,
 } from "lucide-react";
 import { MapLocation } from "@/types";
 import { GLOBAL_STARTUP_HUBS } from "@/lib/location-data";

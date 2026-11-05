@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Trash2, ExternalLink, Download, Sparkles, TrendingUp, ShieldAlert, Award, Scale, Database } from "lucide-react";
+import { X, Trash2, ExternalLink, Download, Sparkles, TrendingUp, Award, Scale, Database } from "lucide-react";
 import { StartupProject, User } from "@/types";
 import { deleteProjectFromVault, exportProjectAsMarkdown } from "@/lib/storage";
 

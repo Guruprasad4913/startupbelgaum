@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, ArrowLeft, ArrowRight, Check, Zap, Target, Shield, Clock, TrendingUp, PenTool, X, Plus, RefreshCw, Lightbulb } from "lucide-react";
+import { Sparkles, ArrowLeft, ArrowRight, Check, Zap, Target, Shield, Clock, PenTool, X, Plus, RefreshCw, Lightbulb } from "lucide-react";
 import { StartupIdea } from "@/types";
 
 interface StepIdeaSelectionProps {
@@ -47,7 +47,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
   const [customDomain, setCustomDomain] = useState(initialIdeas[0]?.domain || "Commercial Venture");
   const [customProblem, setCustomProblem] = useState("");
   const [customSolution, setCustomSolution] = useState("");
-  const [customPersona, setCustomPersona] = useState("Target Customer & Buyer");
+  const [customPersona] = useState("Target Customer & Buyer");
 
   const currentSelectedIdea = ideas.find((i) => i.id === selectedId) || ideas[0];
 

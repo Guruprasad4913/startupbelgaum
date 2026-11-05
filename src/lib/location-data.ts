@@ -1,6 +1,10 @@
 import { MapLocation } from "@/types";
+import { BELAGAVI_LOCATION } from "./belagavi-data";
+
+export { BELAGAVI_LOCATION };
 
 export const GLOBAL_STARTUP_HUBS: MapLocation[] = [
+  BELAGAVI_LOCATION,
   {
     city: "San Francisco / Silicon Valley",
     country: "United States",
@@ -212,7 +216,7 @@ export const GLOBAL_STARTUP_HUBS: MapLocation[] = [
 ];
 
 export const DEFAULT_LOCATION =
-  GLOBAL_STARTUP_HUBS.find((h) => h.city.includes("Bengaluru")) || GLOBAL_STARTUP_HUBS[0];
+  GLOBAL_STARTUP_HUBS.find((h) => h.city.includes("Belagavi")) || BELAGAVI_LOCATION;
 
 export function getLocationByCity(cityName: string): MapLocation {
   const found = GLOBAL_STARTUP_HUBS.find(

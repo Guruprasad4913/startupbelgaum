@@ -7,7 +7,6 @@ import {
   Award,
   TrendingUp,
   MapPin,
-  CheckCircle2,
   Globe,
   IndianRupee,
   Layers,
@@ -16,13 +15,8 @@ import {
   Check,
   BarChart3,
   Activity,
-  Zap,
   Copy,
   Sparkles,
-  Clock,
-  ArrowRight,
-  PieChart as PieIcon,
-  Flame,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -112,13 +106,6 @@ function parseDollarValue(str?: string): number {
 function parseRatio(str?: string): number {
   if (!str) return 0;
   const match = str.match(/([0-9.]+)/);
-  return match ? parseFloat(match[1]) : 0;
-}
-
-// Helper to safely parse percentage string e.g. "82%" -> 82
-function parsePercentage(str?: string): number {
-  if (!str) return 0;
-  const match = str.match(/([0-9.]+)\s*%/);
   return match ? parseFloat(match[1]) : 0;
 }
 

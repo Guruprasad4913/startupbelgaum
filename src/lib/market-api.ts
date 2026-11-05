@@ -38,6 +38,10 @@ function extractPublisher(url?: string): string {
   }
 }
 
+// In-memory cache for live Tavily searches
+const tavilyCache = new Map<string, { data: TavilyMarketAnalysis; exp: number }>();
+const TAVILY_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
 /**
  * Execute real-time web search via Tavily Search API
  */
@@ -48,9 +52,15 @@ export async function searchTavilyMarketData(
   const key = apiKey || process.env.TAVILY_API_KEY;
   if (!key) return null;
 
+  const cacheKey = query.trim().toLowerCase();
+  const cached = tavilyCache.get(cacheKey);
+  if (cached && cached.exp > Date.now()) {
+    return cached.data;
+  }
+
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 6500);
 
     const res = await fetch("https://api.tavily.com/search", {
       method: "POST",
@@ -62,7 +72,7 @@ export async function searchTavilyMarketData(
         query,
         search_depth: "basic",
         include_answer: true,
-        max_results: 5,
+        max_results: 3,
       }),
       signal: controller.signal,
     });
@@ -74,7 +84,7 @@ export async function searchTavilyMarketData(
     }
 
     const data = await res.json();
-    return {
+    const analysis: TavilyMarketAnalysis = {
       query,
       answer: data.answer || undefined,
       results: (data.results || []).map((r: any) => ({
@@ -85,8 +95,15 @@ export async function searchTavilyMarketData(
       })),
       usedTavily: true,
     };
-  } catch (err) {
-    console.warn("Tavily search call failed or timed out:", err);
+
+    tavilyCache.set(cacheKey, { data: analysis, exp: Date.now() + TAVILY_CACHE_TTL });
+    return analysis;
+  } catch (err: any) {
+    if (err?.name === "AbortError" || err?.message?.includes("aborted")) {
+      console.log("Tavily search skipped (fast fallback to local Belagavi intelligence)");
+    } else {
+      console.warn("Tavily search call failed:", err?.message || err);
+    }
     return null;
   }
 }
@@ -184,7 +201,7 @@ export async function fetchLiveMarketSignals(
     const searchQuery = encodeURIComponent(`${domain} startup`);
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 4000);
+      const timeout = setTimeout(() => controller.abort(), 1500);
 
       const hnRes = await fetch(
         `https://hn.algolia.com/api/v1/search?query=${searchQuery}&tags=story&hitsPerPage=3`,

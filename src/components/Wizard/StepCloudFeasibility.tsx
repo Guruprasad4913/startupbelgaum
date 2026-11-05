@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Cloud,
   Cpu,
-  Database,
-  Server,
   IndianRupee,
   AlertTriangle,
   ArrowRight,
@@ -15,11 +13,9 @@ import {
   Layers,
   Sparkles,
   FileCheck,
-  TrendingUp,
   Award,
   Sliders,
   ShieldAlert,
-  HelpCircle,
   Check,
   BarChart3,
 } from "lucide-react";

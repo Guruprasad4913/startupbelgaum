@@ -19,7 +19,6 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  UserCheck,
   HelpCircle,
   Coins,
   Rocket,
@@ -193,22 +192,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onOpenHelp }
     }
   };
 
-  const handleQuickFill = (type: "admin" | "guru" | "investor") => {
-    if (type === "admin") {
-      selectRoleAndTab("admin", "signin");
-      setUsername("admin");
-      setPassword("admin");
-    } else if (type === "guru") {
-      selectRoleAndTab("founder", "signin");
-      setUsername("Guruprasad");
-      setPassword("Guru@4913");
-    } else if (type === "investor") {
-      selectRoleAndTab("investor", "signin");
-      setUsername("investor");
-      setPassword("investor");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#f4f6fa] text-slate-800 flex flex-col justify-between selection:bg-blue-600 selection:text-white relative overflow-hidden">
       {/* Background Subtle Ambient Glows */}
@@ -370,44 +353,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onOpenHelp }
                     14 regional startup talent indices
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Quick Demo Login Credentials helper */}
-            <div className="pt-3 border-t border-slate-200">
-              <div className="text-xs font-semibold text-slate-500 mb-2 flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-500" />
-                <span>Instant 1-Click Demo Accounts:</span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => handleQuickFill("guru")}
-                  className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:border-blue-400 hover:text-blue-600 transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  title="Sign in as Founder Guruprasad"
-                >
-                  <UserCheck className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Founder Demo (Guruprasad)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickFill("investor")}
-                  className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:border-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  title="Sign in as Investor Devon Vance"
-                >
-                  <Coins className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Investor Demo (Devon Vance)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickFill("admin")}
-                  className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50 transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Admin Demo (admin)</span>
-                </button>
               </div>
             </div>
           </div>

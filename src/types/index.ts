@@ -22,6 +22,7 @@ export interface FounderProfile {
   timeframe: string;
   customContext?: string;
   targetLocation?: MapLocation;
+  targetArea?: string;
   founderEmail?: string;
 }
 
@@ -103,6 +104,15 @@ export interface MarketValidation {
     weaknesses: string;
     ourDifferentiation: string;
     fundingOrScale: string;
+    brand?: string;
+    address?: string;
+    locality?: string;
+    lat?: number;
+    lng?: number;
+    isDirectAreaMatch?: boolean;
+    distanceKm?: number;
+    nearbyAreaImpactNote?: string;
+    areaId?: string;
   }>;
   competitorComparisonMatrix?: CompetitorFeatureComparison;
   targetUserAnalysis?: TargetUserAnalysis;

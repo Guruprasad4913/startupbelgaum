@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUsersCollection, getProjectsCollection, connectToDatabase } from "@/lib/mongodb";
+import { getUsersCollection, getProjectsCollection } from "@/lib/mongodb";
 import { User } from "@/types";
 
 // In-memory fallback map for offline local demo
