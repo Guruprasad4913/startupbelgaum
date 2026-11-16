@@ -30,6 +30,7 @@ import { getSavedProjects, syncVaultWithDatabase, saveProjectToVault } from "@/l
 import { getNotificationsForFounder, syncNotificationsWithDatabase } from "@/lib/notifications";
 import { FounderNotificationsModal } from "@/components/Notifications/FounderNotificationsModal";
 import { getLocationByCity } from "@/lib/location-data";
+import { BELAGAVI_LOCATION } from "@/lib/belagavi-data";
 import {
   Sparkles,
   ChevronRight,
@@ -280,82 +281,62 @@ export default function Home() {
     }
   };
 
-  // Preset triggers with regional hub targeting
+  // Preset triggers strictly aligned with Belagavi's 4 core sectors
   const handleSelectPreset = (presetKey: string) => {
     let presetProfile: FounderProfile;
 
     if (presetKey === "food") {
       presetProfile = {
-        domains: ["Food & Beverage", "Hospitality"],
-        businessType: "Food & Beverage / Cafe",
-        interests: ["Artisan Coffee", "Direct Farm Sourcing", "Quick Service"],
+        domains: ["Food & Beverages"],
+        businessType: "Food & Beverage / Cafe & Dining",
+        interests: ["Artisan Coffee", "Direct Farm Sourcing", "Quick Service Dining"],
         skills: ["Culinary Operations", "Hospitality Management", "Local Marketing"],
         targetAudience: "Urban Professionals & Coffee Enthusiasts",
         budget: "₹5,00,000 - ₹25,00,000 (Seed Angel)",
         timeframe: "1-3 Months Full Beta",
-        customContext: "Specialty single-origin micro-roastery cafe chain with zero-waste cold brew taprooms.",
-        targetLocation: getLocationByCity("Bengaluru") || getLocationByCity("London"),
+        customContext: "Specialty single-origin micro-roastery cafe and artisanal culinary space.",
+        targetLocation: BELAGAVI_LOCATION,
+        targetArea: "Tilakwadi / Congress Rd",
       };
-    } else if (presetKey === "d2c") {
+    } else if (presetKey === "education") {
       presetProfile = {
-        domains: ["D2C Consumer Brands", "Sustainable Lifestyle"],
-        businessType: "Physical Products / D2C",
-        interests: ["Eco-friendly Materials", "Circular Economy", "E-commerce"],
-        skills: ["Brand Design", "Supply Chain Sourcing", "Performance Marketing"],
-        targetAudience: "Eco-Conscious Urban Millennials & Gen-Z",
+        domains: ["Education"],
+        businessType: "Education & Coaching Institutes",
+        interests: ["STEM Education", "Robotics Maker Labs", "Hands-on Learning"],
+        skills: ["Curriculum Design", "Coaching & Mentorship", "Studio Operations"],
+        targetAudience: "Parents of K-12 Students & Progressive Schools",
         budget: "₹5,00,000 - ₹25,00,000 (Seed Angel)",
         timeframe: "1-3 Months Full Beta",
-        customContext: "Plastic-free 100% biodegradable bamboo fiber home essentials with closed-loop refill pods.",
-        targetLocation: getLocationByCity("Mumbai") || getLocationByCity("San Francisco / Silicon Valley"),
+        customContext: "Hands-on weekend robotics, 3D printing and electronics maker labs for K-12 students.",
+        targetLocation: BELAGAVI_LOCATION,
+        targetArea: "Tilakwadi / Congress Rd",
       };
-    } else if (presetKey === "agri") {
+    } else if (presetKey === "wellness" || presetKey === "healthtech") {
       presetProfile = {
-        domains: ["Agriculture & Farming", "CleanTech"],
-        businessType: "Agriculture & Green Ops",
-        interests: ["Post-Harvest Storage", "Renewable Solar Cold Rooms", "Farmer Collectives"],
-        skills: ["Agronomy & Cold Chain", "Operations", "Farmer Relations"],
-        targetAudience: "Farmer Producer Organizations (FPOs) & Rural APMC Mandis",
+        domains: ["Healthcare & Wellness"],
+        businessType: "Healthcare Clinics & Wellness Centers",
+        interests: ["Contrast Therapy", "Infrared Saunas", "Athletic Recovery"],
+        skills: ["Physical Wellness Ops", "Clinical Protocol Management", "Customer Experience"],
+        targetAudience: "Everyday Athletes, Gym-Goers & Stressed Executives",
         budget: "₹10,00,000 - ₹50,00,000 (Seed Angel)",
-        timeframe: "3-6 Months Enterprise Pilot",
-        customContext: "Decentralized solar-powered micro cold storage hubs for smallholder horticulture farmers reducing spoilage by 80%.",
-        targetLocation: getLocationByCity("Bengaluru") || getLocationByCity("Toronto"),
-      };
-    } else if (presetKey === "fintech") {
-      presetProfile = {
-        domains: ["Fintech", "B2B SaaS"],
-        businessType: "Tech & Software",
-        interests: ["Fintech & Open Banking", "Workflow Automation & RPA"],
-        skills: ["Full-Stack Dev", "Domain Specialist", "Cloud & DevOps"],
-        targetAudience: "B2B Enterprise",
-        budget: "₹10,00,000 - ₹50,00,000 (Seed Angel)",
-        timeframe: "1-3 Months Pilot Launch",
-        customContext: "Automated real-time accounting audit and cashflow anomaly detector for remote businesses.",
-        targetLocation: getLocationByCity("London"),
-      };
-    } else if (presetKey === "healthtech") {
-      presetProfile = {
-        domains: ["HealthTech", "AI Agents"],
-        businessType: "Healthcare & Wellness",
-        interests: ["Healthcare & Clinical AI", "Enterprise Productivity"],
-        skills: ["Machine Learning / AI", "Full-Stack Dev"],
-        targetAudience: "B2B Enterprise",
-        budget: "₹25,00,000 - ₹1,00,00,000 (Pre-Seed Fund)",
-        timeframe: "1-3 Months Pilot Launch",
-        customContext: "Ambient clinical SOAP notes transcriber and insurance prior-authorization engine.",
-        targetLocation: getLocationByCity("Toronto"),
+        timeframe: "1-3 Months Full Beta",
+        customContext: "Boutique contrast recovery studio offering infrared saunas, cold plunge suites and athletic recovery lounges.",
+        targetLocation: BELAGAVI_LOCATION,
+        targetArea: "Camp & Cantonment",
       };
     } else {
-      // AI Agents
+      // construction / infra
       presetProfile = {
-        domains: ["AI Agents", "Cybersecurity", "DevTools"],
-        businessType: "Tech & Software",
-        interests: ["Autonomous AI Agents", "Developer Tools & APIs"],
-        skills: ["Machine Learning / AI", "Cloud & DevOps", "Full-Stack Dev"],
-        targetAudience: "Mid-Market SMBs",
-        budget: "< ₹5,00,000 (Bootstrapped)",
-        timeframe: "2-Week Rapid MVP",
-        customContext: "Autonomous enterprise security gateway and rate-limiting proxy for multi-agent LLM teams.",
-        targetLocation: getLocationByCity("San Francisco / Silicon Valley"),
+        domains: ["Construction & Infrastructure"],
+        businessType: "Construction & Infrastructure / Turnkey Contracting",
+        interests: ["Precast Concrete", "Modular Walls", "Turnkey Fit-Outs"],
+        skills: ["Civil Engineering", "Site Contracting & Ops", "Materials Procurement"],
+        targetAudience: "Contractors, Commercial Developers & Property Owners",
+        budget: "₹10,00,000 - ₹50,00,000 (Seed Angel)",
+        timeframe: "3-6 Months Commercial Setup",
+        customContext: "Factory-manufactured precast modular wall panels and turnkey commercial interior fit-out contracting company.",
+        targetLocation: BELAGAVI_LOCATION,
+        targetArea: "Udyambag & Machhe",
       };
     }
 

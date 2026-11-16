@@ -199,28 +199,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         userId: currentUser?.id || currentUser?._id || "usr-admin-master",
         username: currentUser?.username || "admin",
         founderProfile: {
-          domains: ["AI Agents", "Fintech"],
-          skills: ["Full-Stack Dev", "Machine Learning"],
-          targetAudience: "B2B Mid-Market SMBs",
+          domains: ["Food & Beverages"],
+          skills: ["Culinary Operations", "Hospitality Management"],
+          targetAudience: "Urban Professionals & Coffee Enthusiasts",
           budget: "₹15,00,000 - ₹50,00,000 (Seed Angel)",
           timeframe: "1-3 Months Full Beta",
-          customContext: "Automated GST reconciliation and real-time cash flow anomaly detector for Indian businesses.",
+          customContext: "Specialty single-origin micro-roastery and cold brew taproom sourcing directly from Western Ghats estates.",
         },
         selectedIdea: {
           id: "idea-demo-1",
-          name: "LedgerPulse AI",
-          tagline: "Autonomous Indian GST & Cashflow Reconciliation Swarm",
-          domain: "Fintech",
-          problemStatement: "Indian SMEs lose 18-25 business hours monthly on manual invoice matching and GST input tax credit disputes.",
-          solution: "A cloud-native multi-agent LLM pipeline connecting directly to Tally, Zoho, and GST APIs with automated discrepancy resolution.",
+          name: "Malaprabha Artisan Roastery",
+          tagline: "Single-Origin Specialty Micro-Roastery & Farm-to-Cup Experience Lounge",
+          domain: "Food & Beverages",
+          problemStatement: "Belagavi professionals and students lack an authentic third-wave specialty cafe offering micro-lot roasts and collaborative work lounges.",
+          solution: "A local micro-roastery cafe featuring certified ethical bean sourcing, batch drum roasting on-site, and zero-waste cold brew taprooms.",
           targetPersona: {
-            title: "CFO / Finance Director",
-            painPoints: ["Manual invoice mismatch", "Delayed working capital", "Tax notice risks"],
-            willingnessToPay: "₹18,000 - ₹45,000 / month",
+            title: "Urban Professionals & Coffee Enthusiasts",
+            painPoints: ["Generic commercial coffee chains", "No specialty bean traceability", "Crowded legacy dining"],
+            willingnessToPay: "₹220 - ₹450 per beverage or bean pack",
           },
-          whyNow: "Rapid mandatory e-invoicing compliance rollouts and open banking Account Aggregator expansion in India.",
-          innovationMoat: "Proprietary tax heuristic knowledge graph and real-time bank telemetry reconciliation.",
-          tags: ["Fintech", "AI Agents", "India", "GST"],
+          whyNow: "Growing demand for artisanal third-wave coffee experiences across tier-2 educational hubs.",
+          innovationMoat: "Exclusive direct micro-lot contracts with Chikmagalur & Kodagu planters.",
+          tags: ["Food & Beverages", "Artisan Coffee", "Belagavi", "Direct Trade"],
           initialFeasibilityScore: 92,
         },
         allIdeas: [],
@@ -356,29 +356,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const scores = savedProjects.map((p) => p.feasibility?.overallScore).filter(Boolean) as number[];
     const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 89;
 
-    // 2. Domain breakdown
+    // 2. Domain breakdown (Strictly Belagavi 4 Core Sectors)
     const domainCounts: Record<string, number> = {
-      "AI Agents": 0,
-      Fintech: 0,
-      HealthTech: 0,
-      "B2B SaaS": 0,
-      DevTools: 0,
-      CleanTech: 0,
+      "Food & Beverages": 0,
+      "Education": 0,
+      "Healthcare & Wellness": 0,
+      "Construction & Infrastructure": 0,
     };
 
     savedProjects.forEach((p) => {
-      const d = p.selectedIdea?.domain || p.founderProfile?.domains?.[0] || "AI Agents";
+      const d = p.selectedIdea?.domain || p.founderProfile?.domains?.[0] || "Food & Beverages";
       if (domainCounts[d] !== undefined) domainCounts[d]++;
       else domainCounts[d] = (domainCounts[d] || 0) + 1;
     });
 
     // Ensure baseline demo values if zero
     if (savedProjects.length === 0) {
-      domainCounts["AI Agents"] = 4;
-      domainCounts["Fintech"] = 3;
-      domainCounts["HealthTech"] = 2;
-      domainCounts["B2B SaaS"] = 3;
-      domainCounts["DevTools"] = 1;
+      domainCounts["Food & Beverages"] = 4;
+      domainCounts["Education"] = 3;
+      domainCounts["Healthcare & Wellness"] = 3;
+      domainCounts["Construction & Infrastructure"] = 2;
     }
 
     const domainPieData = Object.entries(domainCounts)

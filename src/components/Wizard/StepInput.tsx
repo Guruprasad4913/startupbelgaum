@@ -31,7 +31,13 @@ import {
 import { FounderProfile, MapLocation, StartupIdea } from "@/types";
 import { GLOBAL_STARTUP_HUBS, DEFAULT_LOCATION } from "@/lib/location-data";
 import { BelagaviGoogleMap } from "@/components/BelagaviGoogleMap";
-import { BELAGAVI_LOCATION, BELAGAVI_AREAS, BELAGAVI_SECTORS, filterBelagaviCompetitors } from "@/lib/belagavi-data";
+import {
+  BELAGAVI_LOCATION,
+  BELAGAVI_AREAS,
+  BELAGAVI_SECTORS,
+  filterBelagaviCompetitors,
+  resolveSectorKey,
+} from "@/lib/belagavi-data";
 
 interface StepInputProps {
   onGenerate: (profile: FounderProfile) => void;
@@ -71,56 +77,17 @@ const INDUSTRY_CATEGORIES = [
     audience: "Urban Professionals & Coffee Enthusiasts",
   },
   {
-    id: "d2c",
-    label: "D2C (Direct-to-Consumer)",
-    domain: "D2C (Direct-to-Consumer) Brands",
-    businessType: "Physical Products / D2C (Direct-to-Consumer)",
-    badge: "Consumer Products",
-    icon: Package,
-    color: "hover:border-pink-400 hover:bg-pink-50/50",
-    activeColor: "border-pink-500 bg-pink-50 text-pink-900",
-    exampleProblem: "100% biodegradable bamboo fiber everyday kitchenware and home essentials brand",
-    skills: "Product Design, Brand Marketing & Vendor Sourcing",
-    audience: "Eco-Conscious Millennial Households",
-  },
-  {
-    id: "manufacturing",
-    label: "Manufacturing & Hardware",
-    domain: "Manufacturing",
-    businessType: "Manufacturing & Hardware",
-    badge: "Hardware & Production",
-    icon: Factory,
-    color: "hover:border-blue-400 hover:bg-blue-50/50",
-    activeColor: "border-blue-500 bg-blue-50 text-blue-900",
-    exampleProblem: "Modular decentralized solar cold storage rooms for rural agricultural mandis to prevent crop rot",
-    skills: "Mechanical Engineering, Production Ops & Logistics",
-    audience: "Commercial Facilities, Mandi Traders & FPOs (Farmer Producer Organizations)",
-  },
-  {
-    id: "construction",
-    label: "Construction & Infra",
-    domain: "Construction & Infrastructure",
-    businessType: "Construction & Infrastructure",
-    badge: "Building & Materials",
-    icon: HardHat,
-    color: "hover:border-amber-400 hover:bg-amber-50/50",
-    activeColor: "border-amber-600 bg-amber-50 text-amber-900",
-    exampleProblem: "Factory-manufactured precast modular wall panels and turnkey commercial interior fit-out contracting company",
-    skills: "Civil Engineering, Site Contracting & Materials Supply",
-    audience: "Contractors, Commercial Developers & Property Owners",
-  },
-  {
-    id: "agriculture",
-    label: "Agriculture & Farming",
-    domain: "Agriculture",
-    businessType: "Agriculture & Green Ops",
-    badge: "Agri-Supply",
-    icon: Sprout,
-    color: "hover:border-emerald-400 hover:bg-emerald-50/50",
-    activeColor: "border-emerald-600 bg-emerald-50 text-emerald-900",
-    exampleProblem: "Vertical climate-controlled indoor hydroponic farm producing high-yield saffron and culinary microgreens",
-    skills: "Horticulture, Agribusiness & Farm Operations",
-    audience: "Luxury Hotels, Restaurants & Supermarkets",
+    id: "education",
+    label: "Education & Coaching",
+    domain: "Education",
+    businessType: "Education & Coaching Institutes",
+    badge: "Academies & Coaching",
+    icon: GraduationCap,
+    color: "hover:border-cyan-400 hover:bg-cyan-50/50",
+    activeColor: "border-cyan-600 bg-cyan-50 text-cyan-900",
+    exampleProblem: "Hands-on weekend robotics, 3D printing and electronics maker labs for K-12 students",
+    skills: "Curriculum Design, Coaching & Studio Operations",
+    audience: "Parents of K-12 Students & Progressive Schools",
   },
   {
     id: "wellness",
@@ -136,82 +103,17 @@ const INDUSTRY_CATEGORIES = [
     audience: "Everyday Athletes, Gym-Goers & Stressed Executives",
   },
   {
-    id: "services",
-    label: "Physical Services",
-    domain: "Physical Services",
-    businessType: "Services & Operations",
-    badge: "Operations & Fleet",
-    icon: Truck,
-    color: "hover:border-yellow-400 hover:bg-yellow-50/50",
-    activeColor: "border-yellow-600 bg-yellow-50 text-yellow-900",
-    exampleProblem: "Waterless on-demand mobile EV fleet detailing and doorstep rapid maintenance vans",
-    skills: "Fleet Operations, Vendor Management & Dispatch",
-    audience: "Commercial Fleet Operators & Vehicle Owners",
-  },
-  {
-    id: "retail",
-    label: "Retail & Stores",
-    domain: "Retail",
-    businessType: "Retail & Storefront",
-    badge: "Stores & Experiences",
-    icon: Store,
-    color: "hover:border-teal-400 hover:bg-teal-50/50",
-    activeColor: "border-teal-600 bg-teal-50 text-teal-900",
-    exampleProblem: "Zero-waste packaging-free bulk grocery and natural detergent refill dispensary stores",
-    skills: "Retail Merchandising & Community Building",
-    audience: "Urban Apartment Dwellers & Zero-Waste Families",
-  },
-  {
-    id: "education",
-    label: "Education & Sports",
-    domain: "Offline Education",
-    businessType: "Offline Education & Sports",
-    badge: "Academies & Clubs",
-    icon: GraduationCap,
-    color: "hover:border-cyan-400 hover:bg-cyan-50/50",
-    activeColor: "border-cyan-600 bg-cyan-50 text-cyan-900",
-    exampleProblem: "Hands-on weekend robotics, 3D printing and electronics maker labs for K-12 students",
-    skills: "Curriculum Design, Coaching & Studio Operations",
-    audience: "Parents of K-12 Students & Progressive Schools",
-  },
-  {
-    id: "cleantech",
-    label: "CleanTech & Waste",
-    domain: "CleanTech & Waste Management",
-    businessType: "CleanTech & Green Ops",
-    badge: "Clean Energy",
-    icon: Leaf,
-    color: "hover:border-green-400 hover:bg-green-50/50",
-    activeColor: "border-green-600 bg-green-50 text-green-900",
-    exampleProblem: "Decentralized hydrometallurgical micro-hubs recovering pure copper and gold from discarded e-waste",
-    skills: "Chemical Engineering & Environmental Compliance",
-    audience: "Corporate IT Offices & Municipal Councils",
-  },
-  {
-    id: "tech",
-    label: "Tech & Software",
-    domain: "B2B (Business-to-Business) SaaS (Software as a Service) & Tech",
-    businessType: "Tech & Software",
-    badge: "Digital Platforms",
-    icon: Cpu,
-    color: "hover:border-indigo-400 hover:bg-indigo-50/50",
-    activeColor: "border-indigo-600 bg-indigo-50 text-indigo-900",
-    exampleProblem: "API (Application Programming Interface)-first automated real-time accounting audit and dynamic cashflow forecasting",
-    skills: "Full-Stack Dev, Machine Learning & Product",
-    audience: "Mid-Market SMBs (Small & Midsize Businesses) & B2B (Business-to-Business) Enterprise",
-  },
-  {
-    id: "others",
-    label: "Others / Custom",
-    domain: "Custom Industry & New Markets",
-    businessType: "Others",
-    badge: "Flexible Model",
-    icon: Sparkles,
-    color: "hover:border-purple-400 hover:bg-purple-50/50",
-    activeColor: "border-purple-600 bg-purple-50 text-purple-900",
-    exampleProblem: "Fragmented market inefficiencies and underserved customer segments seeking modern innovative alternatives",
-    skills: "Domain Expertise & Agile Execution",
-    audience: "Target Market Customers & Specialized Segments",
+    id: "construction",
+    label: "Construction & Infra",
+    domain: "Construction & Infrastructure",
+    businessType: "Construction & Infrastructure",
+    badge: "Building & Materials",
+    icon: HardHat,
+    color: "hover:border-emerald-400 hover:bg-emerald-50/50",
+    activeColor: "border-emerald-600 bg-emerald-50 text-emerald-900",
+    exampleProblem: "Factory-manufactured precast modular wall panels and turnkey commercial interior fit-out contracting company",
+    skills: "Civil Engineering, Site Contracting & Materials Supply",
+    audience: "Contractors, Commercial Developers & Property Owners",
   },
 ];
 
@@ -236,8 +138,6 @@ export const StepInput: React.FC<StepInputProps> = ({
     initialProfile?.businessType || ""
   );
 
-  // Custom business model specification (when Others is selected)
-  const [customBusinessType, setCustomBusinessType] = useState<string>("");
 
   // 1. Startup Concept or Problem Statement
   const [customContext, setCustomContext] = useState<string>(
@@ -282,37 +182,20 @@ export const StepInput: React.FC<StepInputProps> = ({
   );
   const [customBelagaviArea, setCustomBelagaviArea] = useState<string>("");
   const [showBelagaviMap, setShowBelagaviMap] = useState<boolean>(true);
-  const [sectorFilter, setSectorFilter] = useState<"belagavi" | "all">("belagavi");
 
   const resolvedBelagaviArea = customBelagaviArea.trim() || belagaviArea;
 
   const activeSectorKey = useMemo((): "food" | "education" | "healthcare" | "construction" => {
-    const combined = `${selectedCategory} ${domainsInput} ${businessType} ${customContext}`.toLowerCase();
-    if (combined.includes("education") || combined.includes("edtech") || combined.includes("school") || combined.includes("college") || combined.includes("academy") || combined.includes("tutoring") || combined.includes("coaching") || combined.includes("learning")) {
-      return "education";
-    }
-    if (combined.includes("health") || combined.includes("wellness") || combined.includes("clinic") || combined.includes("hospital") || combined.includes("medical") || combined.includes("diagnostic") || combined.includes("pharma") || combined.includes("care")) {
-      return "healthcare";
-    }
-    if (combined.includes("construct") || combined.includes("infra") || combined.includes("building") || combined.includes("real estate") || combined.includes("turnkey") || combined.includes("contract") || combined.includes("precast") || combined.includes("cement") || combined.includes("civil") || combined.includes("property")) {
-      return "construction";
-    }
-    return "food";
+    return resolveSectorKey(domainsInput || selectedCategory, businessType, [customContext]);
   }, [selectedCategory, domainsInput, businessType, customContext]);
 
   const getBelagaviSectorKey = (catId: string): "food" | "education" | "healthcare" | "construction" => {
     if (catId === "food") return "food";
     if (catId === "education") return "education";
-    if (catId === "wellness") return "healthcare";
+    if (catId === "wellness" || catId === "healthcare") return "healthcare";
     if (catId === "construction") return "construction";
     return activeSectorKey;
   };
-
-  // Check if customContext matches another category preset while current selection differs
-  const matchingCategory = INDUSTRY_CATEGORIES.find(
-    (c) => c.exampleProblem.trim() === customContext.trim()
-  );
-  const hasMismatch = !!(matchingCategory && selectedCategory && matchingCategory.id !== selectedCategory);
 
   const parseList = (str: string, fallback: string[]): string[] => {
     const list = str
@@ -327,7 +210,6 @@ export const StepInput: React.FC<StepInputProps> = ({
       setSelectedCategory("");
       setDomainsInput("");
       setBusinessType("");
-      setCustomBusinessType("");
       setCustomContext("");
       setSkillsInput("");
       setTargetAudience("");
@@ -336,15 +218,7 @@ export const StepInput: React.FC<StepInputProps> = ({
     setSelectedCategory(cat.id);
     setDomainsInput(cat.domain);
     setBusinessType(cat.businessType);
-    if (cat.id === "others") {
-      setCustomBusinessType("");
-    }
-    const isExistingPresetProblem = INDUSTRY_CATEGORIES.some(
-      (c) => c.exampleProblem.trim() === customContext.trim()
-    );
-    if (!customContext.trim() || isExistingPresetProblem) {
-      setCustomContext(cat.exampleProblem);
-    }
+    setCustomContext(cat.exampleProblem);
     setSkillsInput(cat.skills);
     setTargetAudience(cat.audience);
   };
@@ -353,15 +227,13 @@ export const StepInput: React.FC<StepInputProps> = ({
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!domainsInput.trim()) {
-      alert("Please enter at least one target domain or industry.");
+      alert("Please select one of the 4 core sectors.");
       return;
     }
-    const domains = parseList(domainsInput, ["Commercial Venture"]);
+    const domains = parseList(domainsInput, ["Food & Beverage"]);
     const skills = parseList(skillsInput, ["Business Operations & Execution"]);
 
-    const resolvedBusinessType = businessType === "Others"
-      ? (customBusinessType.trim() || "Others / Custom Model")
-      : (businessType || "Commercial Venture");
+    const resolvedBusinessType = businessType || "Commercial Operations";
 
     const finalArea = customBelagaviArea.trim() || belagaviArea;
     const profile: FounderProfile = {
@@ -395,9 +267,7 @@ export const StepInput: React.FC<StepInputProps> = ({
     const domains = parseList(domainsInput, ["Commercial Venture"]);
     const skills = parseList(skillsInput, ["Business Operations & Execution"]);
 
-    const resolvedBusinessType = businessType === "Others"
-      ? (customBusinessType.trim() || "Others / Custom Model")
-      : (businessType || "Commercial Venture");
+    const resolvedBusinessType = businessType || "Commercial Operations";
 
     const finalArea = customBelagaviArea.trim() || belagaviArea;
     const profile: FounderProfile = {
@@ -470,7 +340,7 @@ export const StepInput: React.FC<StepInputProps> = ({
           Launch &amp; Validate Any <span className="gradient-text">Startup Concept</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          From Food &amp; Dining, D2C brands, manufacturing, and agriculture to healthcare clinics and AI software — test and validate any concept with live market sizing, competitor analysis, and cloud blueprints.
+          Institutional validation engine strictly built for Belagavi&apos;s 4 core economic sectors: Food &amp; Beverages, Education, Healthcare &amp; Wellness, and Construction &amp; Infrastructure — with hyper-local competitor mapping and ground intelligence.
         </p>
       </div>
 
@@ -501,42 +371,23 @@ export const StepInput: React.FC<StepInputProps> = ({
 
       {/* 1. Industry Category Picker Cards */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-            <Compass className="w-4 h-4 text-blue-600" />
-            <span>Select Industry Sector</span>
-          </label>
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-            <button
-              type="button"
-              onClick={() => setSectorFilter("belagavi")}
-              className={`px-3 py-1 rounded-lg font-bold text-xs transition cursor-pointer ${
-                sectorFilter === "belagavi"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Belagavi 4 Core Sectors
-            </button>
-            <button
-              type="button"
-              onClick={() => setSectorFilter("all")}
-              className={`px-3 py-1 rounded-lg font-medium text-xs transition cursor-pointer ${
-                sectorFilter === "all"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              All Industry Sectors
-            </button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <Compass className="w-4 h-4 text-blue-600" />
+              <span>Select Core Sector *</span>
+              <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-mono font-semibold">
+                Belagavi 4 Focus Sectors
+              </span>
+            </label>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Choose one of the 4 designated sectors for Belagavi to auto-populate tailored templates.
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {(sectorFilter === "belagavi"
-            ? INDUSTRY_CATEGORIES.filter((c) => ["food", "education", "wellness", "construction"].includes(c.id))
-            : INDUSTRY_CATEGORIES
-          ).map((cat) => {
+          {INDUSTRY_CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             const isSelected = selectedCategory === cat.id;
             return (
@@ -588,26 +439,9 @@ export const StepInput: React.FC<StepInputProps> = ({
             rows={3}
             value={customContext}
             onChange={(e) => setCustomContext(e.target.value)}
-            placeholder="Describe what you want to build or the problem you are solving (e.g. Specialty single-origin micro-roastery cafe chain, bamboo tableware brand, solar cold storage for farmers, or B2B SaaS)..."
+            placeholder="Describe your startup concept or customer problem in Belagavi (e.g. Specialty micro-roastery cafe, K-12 robotics maker lab, athletic recovery lounge, or precast modular walls)..."
             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition resize-none leading-relaxed shadow-sm"
           />
-          {hasMismatch && (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-300 text-xs text-amber-900 animate-in fade-in duration-200">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0 animate-pulse" />
-                <span>
-                  Notice: Your problem statement belongs to <strong>{matchingCategory.label}</strong>, but domain is set to <strong>{domainsInput}</strong>.
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleSelectCategory(matchingCategory)}
-                className="px-3 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold border border-amber-300 text-[11px] transition cursor-pointer flex-shrink-0"
-              >
-                Auto-Align to {matchingCategory.label}
-              </button>
-            </div>
-          )}
         </div>
 
         {/* 2-Column Clean Entries Grid */}
@@ -623,10 +457,10 @@ export const StepInput: React.FC<StepInputProps> = ({
               required
               value={domainsInput}
               onChange={(e) => setDomainsInput(e.target.value)}
-              placeholder="e.g. Food & Beverage, D2C, Agriculture, Healthcare"
+              placeholder="e.g. Food & Beverage, Education, Healthcare & Wellness, Construction & Infrastructure"
               className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition shadow-sm"
             />
-            <span className="text-[10px] text-slate-500">Industry or product category</span>
+            <span className="text-[10px] text-slate-500">Core Belagavi sector</span>
           </div>
 
           {/* Business Model / Type */}
@@ -643,57 +477,19 @@ export const StepInput: React.FC<StepInputProps> = ({
               <option value="" disabled className="text-slate-500">
                 Select business model type...
               </option>
-              <option value="Food & Beverage / Cafe">
-                🍽️ Food &amp; Beverage / Cafe / Dining
+              <option value="Food & Beverage / Cafe & Dining">
+                🍽️ Food &amp; Beverage / Cafe &amp; Dining
               </option>
-              <option value="Construction & Infrastructure">
-                🏗️ Construction &amp; Infrastructure
+              <option value="Education & Coaching Institutes">
+                🎓 Education &amp; Coaching Institutes
               </option>
-              <option value="Turnkey Contracting & Field Services">
-                🔨 Turnkey Contracting &amp; Field Services
+              <option value="Healthcare Clinics & Wellness Centers">
+                🏥 Healthcare Clinics &amp; Wellness Centers
               </option>
-              <option value="Physical Products / D2C">
-                📦 Physical Products &amp; D2C Brand
-              </option>
-              <option value="Manufacturing & Hardware">
-                🏭 Manufacturing &amp; Hardware
-              </option>
-              <option value="Agriculture & Green Ops">
-                🌾 Agriculture &amp; Farming
-              </option>
-              <option value="Healthcare & Wellness">
-                🏥 Healthcare Clinics &amp; Wellness
-              </option>
-              <option value="Services & Operations">
-                🚚 Physical Services &amp; Logistics
-              </option>
-              <option value="Retail & Storefront">
-                🛍️ Retail &amp; Brick-and-Mortar Store
-              </option>
-              <option value="Offline Education & Sports">
-                🎓 Offline Education &amp; Sports
-              </option>
-              <option value="CleanTech & Green Ops">
-                ♻️ CleanTech &amp; Waste Management
-              </option>
-              <option value="Tech & Software">
-                💻 Tech, Software &amp; AI
-              </option>
-              <option value="Others" className="text-blue-700 font-semibold">
-                ✨ Others / Custom Business Model
+              <option value="Construction & Infrastructure / Turnkey Contracting">
+                🏗️ Construction &amp; Infrastructure / Turnkey Contracting
               </option>
             </select>
-            {businessType === "Others" && (
-              <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                <input
-                  type="text"
-                  value={customBusinessType}
-                  onChange={(e) => setCustomBusinessType(e.target.value)}
-                  placeholder="Specify custom model (e.g. Media &amp; Publishing, Agency, Franchise, Real Estate)..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-300 text-xs text-blue-950 placeholder-blue-500/60 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition font-medium"
-                />
-              </div>
-            )}
             <span className="text-[10px] text-slate-500">Core operational model</span>
           </div>
 

@@ -44,7 +44,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
   // Custom concept form state
   const [customName, setCustomName] = useState("");
   const [customTagline, setCustomTagline] = useState("");
-  const [customDomain, setCustomDomain] = useState(initialIdeas[0]?.domain || "Commercial Venture");
+  const [customDomain, setCustomDomain] = useState(initialIdeas[0]?.domain || "Food & Beverages");
   const [customProblem, setCustomProblem] = useState("");
   const [customSolution, setCustomSolution] = useState("");
   const [customPersona] = useState("Target Customer & Buyer");
@@ -55,7 +55,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
     e.preventDefault();
     if (!customName.trim() || !customProblem.trim()) return;
 
-    const domain = customDomain.trim() || initialIdeas[0]?.domain || "Commercial Venture";
+    const domain = customDomain.trim() || initialIdeas[0]?.domain || "Food & Beverages";
 
     const newIdea: StartupIdea = {
       id: `custom-${Date.now()}`,
@@ -391,14 +391,17 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-800">Domain / Vertical</label>
-                  <input
-                    type="text"
+                  <label className="font-semibold text-slate-800">Domain / Sector (Belagavi 4 Core)</label>
+                  <select
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
-                    placeholder="e.g. Food & Beverage, D2C, Farming, Healthcare, SaaS"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 shadow-sm transition"
-                  />
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 shadow-sm transition"
+                  >
+                    <option value="Food & Beverages">🍽️ Food &amp; Beverages</option>
+                    <option value="Education">🎓 Education &amp; Coaching</option>
+                    <option value="Healthcare & Wellness">🏥 Healthcare &amp; Wellness</option>
+                    <option value="Construction & Infrastructure">🏗️ Construction &amp; Infrastructure</option>
+                  </select>
                 </div>
               </div>
 
