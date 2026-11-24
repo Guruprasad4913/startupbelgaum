@@ -86,7 +86,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-28">
       {/* Step Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -455,6 +455,36 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Sticky Bottom Bar when an idea is selected - Always visible without scrolling! */}
+      {currentSelectedIdea && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Selected:</span>
+              <strong className="text-sm font-bold text-slate-900 truncate">{currentSelectedIdea.name}</strong>
+              <span className="text-xs text-slate-500 hidden md:inline truncate">· {currentSelectedIdea.tagline}</span>
+            </div>
+            <button
+              onClick={() => onSelectIdea(currentSelectedIdea)}
+              disabled={isValidating}
+              className="px-6 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white font-bold text-xs sm:text-sm shadow-md border border-[#12224d] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer disabled:opacity-50 flex-shrink-0"
+            >
+              {isValidating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Checking Competitors...</span>
+                </>
+              ) : (
+                <>
+                  <span>Continue to Competitors</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}

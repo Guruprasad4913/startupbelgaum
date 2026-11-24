@@ -215,7 +215,7 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
   }, [competitorComparisonMatrix, displayedCompetitors, activeSector, detectedSector]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-28">
       {/* Top Header & Action Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -345,72 +345,6 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
         </div>
       )}
 
-      {/* Quick 30-Second Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: 3-Year Opportunity */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-800">
-              <IndianRupee className="w-4 h-4 text-emerald-600" /> Realistic 3-Year Target
-            </span>
-            <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-medium">₹ INR</span>
-          </div>
-          <div className="text-2xl font-black text-slate-900">{validation.som.value}</div>
-          <p className="text-[11px] text-slate-500 leading-snug">
-            Estimated revenue achievable over 36 months in Belagavi and nearby areas.
-          </p>
-        </div>
-
-        {/* Card 2: Industry Growth Rate */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-800">
-              <TrendingUp className="w-4 h-4 text-[#243d78]" /> Annual Market Growth
-            </span>
-            <span className="text-[10px] bg-blue-50 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded font-mono font-medium">Per Year</span>
-          </div>
-          <div className="text-2xl font-black text-[#243d78]">{validation.cagr}</div>
-          <p className="text-[11px] text-slate-500 leading-snug">
-            Year-over-year market growth rate, showing growing consumer demand.
-          </p>
-        </div>
-
-        {/* Card 3: Top Competitor & Edge */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-800">
-              <ShieldCheck className="w-4 h-4 text-indigo-600" /> Your Key Advantage
-            </span>
-            <span className="text-[10px] bg-indigo-50 text-indigo-800 border border-indigo-200 px-1.5 py-0.5 rounded font-mono font-medium">Advantage</span>
-          </div>
-          <div className="text-sm font-bold text-slate-900 line-clamp-2">
-            {idea.innovationMoat || validation.competitors[0]?.ourDifferentiation || "Modern Quality & Service"}
-          </div>
-          <p className="text-[11px] text-slate-500 leading-snug">
-            Why customers will pick you over {validation.competitors[0]?.name || "older businesses"}.
-          </p>
-        </div>
-
-        {/* Card 4: Primary Buyer & Channel */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-800">
-              <Users className="w-4 h-4 text-sky-600" /> Target Customers
-            </span>
-            <span className="text-[10px] bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.5 rounded font-medium">Customers</span>
-          </div>
-          <div className="text-sm font-bold text-slate-900 truncate">
-            {targetUserAnalysis?.personaName || idea.targetPersona.title}
-          </div>
-          <div className="text-[11px] text-emerald-700 font-semibold">
-            Spending: {targetUserAnalysis?.willingnessToPayRange || idea.targetPersona.willingnessToPay}
-          </div>
-          <p className="text-[10px] text-slate-500 truncate">
-            Best Way to Reach: {targetUserAnalysis?.acquisitionChannels[0]?.channel || "Local Word-of-Mouth & Signage"}
-          </p>
-        </div>
-      </div>
-
       {/* Sub-Tabs Navigation - Put Competitors First by default! */}
       <div className="flex border-b border-slate-200 gap-3 sm:gap-6 overflow-x-auto pb-1">
         <button
@@ -457,10 +391,75 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* TAB 1: MARKET ANALYSIS & SIZING */}
+      {/* TAB 2: MARKET ANALYSIS & SIZING */}
       {/* ========================================================================= */}
       {activeTab === "market" && (
         <div className="space-y-8 animate-in fade-in duration-200">
+          {/* Quick 30-Second Summary Cards (Moved inside Market Tab so Competitor cards are immediately visible!) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: 3-Year Opportunity */}
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <IndianRupee className="w-4 h-4 text-emerald-600" /> Realistic 3-Year Target
+                </span>
+                <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-medium">₹ INR</span>
+              </div>
+              <div className="text-2xl font-black text-slate-900">{validation.som.value}</div>
+              <p className="text-[11px] text-slate-500 leading-snug">
+                Estimated revenue achievable over 36 months in Belagavi and nearby areas.
+              </p>
+            </div>
+
+            {/* Card 2: Industry Growth Rate */}
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <TrendingUp className="w-4 h-4 text-[#243d78]" /> Annual Market Growth
+                </span>
+                <span className="text-[10px] bg-blue-50 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded font-mono font-medium">Per Year</span>
+              </div>
+              <div className="text-2xl font-black text-[#243d78]">{validation.cagr}</div>
+              <p className="text-[11px] text-slate-500 leading-snug">
+                Year-over-year market growth rate, showing growing consumer demand.
+              </p>
+            </div>
+
+            {/* Card 3: Top Competitor & Edge */}
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <ShieldCheck className="w-4 h-4 text-indigo-600" /> Your Key Advantage
+                </span>
+                <span className="text-[10px] bg-indigo-50 text-indigo-800 border border-indigo-200 px-1.5 py-0.5 rounded font-mono font-medium">Advantage</span>
+              </div>
+              <div className="text-sm font-bold text-slate-900 line-clamp-2">
+                {idea.innovationMoat || validation.competitors[0]?.ourDifferentiation || "Modern Quality & Service"}
+              </div>
+              <p className="text-[11px] text-slate-500 leading-snug">
+                Why customers will pick you over {validation.competitors[0]?.name || "older businesses"}.
+              </p>
+            </div>
+
+            {/* Card 4: Primary Buyer & Channel */}
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
+                <span className="flex items-center gap-1.5 text-slate-800">
+                  <Users className="w-4 h-4 text-sky-600" /> Target Customers
+                </span>
+                <span className="text-[10px] bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.5 rounded font-medium">Customers</span>
+              </div>
+              <div className="text-sm font-bold text-slate-900 truncate">
+                {targetUserAnalysis?.personaName || idea.targetPersona.title}
+              </div>
+              <div className="text-[11px] text-emerald-700 font-semibold">
+                Spending: {targetUserAnalysis?.willingnessToPayRange || idea.targetPersona.willingnessToPay}
+              </div>
+              <p className="text-[10px] text-slate-500 truncate">
+                Best Way to Reach: {targetUserAnalysis?.acquisitionChannels[0]?.channel || "Local Word-of-Mouth & Signage"}
+              </p>
+            </div>
+          </div>
           {/* Visual Market Sizing Funnel & Growth Speed */}
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -1657,6 +1656,86 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
           </div>
         </div>
       )}
+
+      {/* Floating Sticky Bottom Action Bar - Always accessible so you never have to scroll down to click Next or Back! */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-4 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back to Choose Idea</span>
+            <span className="sm:hidden">Back</span>
+          </button>
+
+          {/* Quick Subtab Switcher right on the floating bar! */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("competitors");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                activeTab === "competitors"
+                  ? "bg-[#243d78] text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              }`}
+            >
+              📍 Competitors ({displayedCompetitors.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("market");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                activeTab === "market"
+                  ? "bg-[#243d78] text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              }`}
+            >
+              💰 Market Demand
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("users");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                activeTab === "users"
+                  ? "bg-[#243d78] text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              }`}
+            >
+              👥 Customers
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={isEvaluatingCloud}
+            className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-md border border-[#12224d] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            {isEvaluatingCloud ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Checking...</span>
+              </>
+            ) : (
+              <>
+                <span>Next: Feasibility</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
