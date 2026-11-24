@@ -337,10 +337,10 @@ export const StepInput: React.FC<StepInputProps> = ({
           )}
         </div>
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
-          Launch &amp; Validate Any <span className="gradient-text">Startup Concept</span>
+          Check Your Business Idea in <span className="gradient-text">Belagavi</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Institutional validation engine strictly built for Belagavi&apos;s 4 core economic sectors: Food &amp; Beverages, Education, Healthcare &amp; Wellness, and Construction &amp; Infrastructure — with hyper-local competitor mapping and ground intelligence.
+          See who your existing local competitors are, check market demand, and plan your business across Belagavi&apos;s 4 core sectors: Food &amp; Beverages, Education, Healthcare &amp; Wellness, and Construction &amp; Infrastructure.
         </p>
       </div>
 
@@ -349,22 +349,22 @@ export const StepInput: React.FC<StepInputProps> = ({
         <div className="flex items-start gap-3">
           <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-200 flex-shrink-0 mt-0.5 shadow-sm">1</div>
           <div>
-            <span className="font-bold text-slate-900 text-xs block">Choose Industry</span>
-            <span className="text-xs text-slate-600 leading-normal">Click a sector below to auto-fill templates, or enter custom details.</span>
+            <span className="font-bold text-slate-900 text-xs block">1. Pick a Sector</span>
+            <span className="text-xs text-slate-600 leading-normal">Choose one of Belagavi&apos;s 4 core sectors below.</span>
           </div>
         </div>
         <div className="flex items-start gap-3">
           <div className="w-7 h-7 rounded-xl bg-cyan-50 text-cyan-700 font-bold text-xs flex items-center justify-center border border-cyan-200 flex-shrink-0 mt-0.5 shadow-sm">2</div>
           <div>
-            <span className="font-bold text-slate-900 text-xs block">Enter Your Vision</span>
-            <span className="text-xs text-slate-600 leading-normal">Describe the problem you solve, target buyer, and your budget.</span>
+            <span className="font-bold text-slate-900 text-xs block">2. Select Your Area</span>
+            <span className="text-xs text-slate-600 leading-normal">Pick your area in Belagavi (e.g. Udyambag, Tilakwadi) and budget.</span>
           </div>
         </div>
         <div className="flex items-start gap-3">
           <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs flex items-center justify-center border border-emerald-200 flex-shrink-0 mt-0.5 shadow-sm">3</div>
           <div>
-            <span className="font-bold text-slate-900 text-xs block">Get Full Audit</span>
-            <span className="text-xs text-slate-600 leading-normal">Instant TAM sizing, competitor battlecards, cloud costs, and MVP sprint.</span>
+            <span className="font-bold text-slate-900 text-xs block">3. See Competitors</span>
+            <span className="text-xs text-slate-600 leading-normal">See who is already operating there and how you can win.</span>
           </div>
         </div>
       </div>
@@ -431,15 +431,15 @@ export const StepInput: React.FC<StepInputProps> = ({
           <label className="text-xs font-semibold text-slate-800 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-              Startup Idea or Problem to Solve
+              What business do you want to start? (Your Idea)
             </span>
-            <span className="text-[10px] text-slate-600 font-mono bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Optional / Leave blank for AI synthesis</span>
+            <span className="text-[10px] text-slate-600 font-mono bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Optional / Leave blank for automatic suggestions</span>
           </label>
           <textarea
             rows={3}
             value={customContext}
             onChange={(e) => setCustomContext(e.target.value)}
-            placeholder="Describe your startup concept or customer problem in Belagavi (e.g. Specialty micro-roastery cafe, K-12 robotics maker lab, athletic recovery lounge, or precast modular walls)..."
+            placeholder="Briefly describe your idea (e.g. Specialty coffee cafe near colleges, robotics coaching center for school students, physiotherapy & recovery clinic, or precast modular pavers)..."
             className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition resize-none leading-relaxed shadow-sm"
           />
         </div>
@@ -450,7 +450,7 @@ export const StepInput: React.FC<StepInputProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
               <Compass className="w-3.5 h-3.5 text-blue-600" />
-              Target Domain &amp; Industry *
+              Business Sector *
             </label>
             <input
               type="text"
@@ -467,7 +467,7 @@ export const StepInput: React.FC<StepInputProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
               <Store className="w-3.5 h-3.5 text-blue-600" />
-              Business Model Type *
+              Type of Business *
             </label>
             <select
               value={businessType}
@@ -475,7 +475,7 @@ export const StepInput: React.FC<StepInputProps> = ({
               className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition shadow-sm cursor-pointer"
             >
               <option value="" disabled className="text-slate-500">
-                Select business model type...
+                Select business type...
               </option>
               <option value="Food & Beverage / Cafe & Dining">
                 🍽️ Food &amp; Beverage / Cafe &amp; Dining
@@ -490,41 +490,41 @@ export const StepInput: React.FC<StepInputProps> = ({
                 🏗️ Construction &amp; Infrastructure / Turnkey Contracting
               </option>
             </select>
-            <span className="text-[10px] text-slate-500">Core operational model</span>
+            <span className="text-[10px] text-slate-500">How your business operates</span>
           </div>
 
           {/* Founder Skills & Strengths */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
               <Rocket className="w-3.5 h-3.5 text-emerald-600" />
-              Founder Skills &amp; Capabilities *
+              Your Experience &amp; Skills *
             </label>
             <input
               type="text"
               required
               value={skillsInput}
               onChange={(e) => setSkillsInput(e.target.value)}
-              placeholder="e.g. Culinary Ops, Sourcing, Marketing, Sales, Engineering"
+              placeholder="e.g. Cooking, Teaching, Sales, Construction, Managing staff..."
               className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition shadow-sm"
             />
-            <span className="text-[10px] text-slate-500">Execution strengths of your team</span>
+            <span className="text-[10px] text-slate-500">Skills you or your partners bring</span>
           </div>
 
           {/* Target Customer Segment */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5 text-cyan-600" />
-              Target Customer Segment *
+              Who Will Be Your Customers? *
             </label>
             <input
               type="text"
               required
               value={targetAudience}
               onChange={(e) => setTargetAudience(e.target.value)}
-              placeholder="e.g. Urban Professionals, Homeowners, Gym-Goers, FPOs"
+              placeholder="e.g. Families, College students, Office workers, Homeowners..."
               className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/15 transition shadow-sm"
             />
-            <span className="text-[10px] text-slate-500">Primary buyer persona</span>
+            <span className="text-[10px] text-slate-500">Main customer group</span>
           </div>
 
           {/* Founder's Email / Gmail */}
@@ -553,7 +553,7 @@ export const StepInput: React.FC<StepInputProps> = ({
           <div className="space-y-1.5 sm:col-span-2">
             <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-pink-600" />
-              MVP (Minimum Viable Product) Launch Timeframe *
+              When Do You Plan to Start? *
             </label>
             <select
               value={timeframe}
@@ -561,7 +561,7 @@ export const StepInput: React.FC<StepInputProps> = ({
               className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-pink-600 focus:ring-2 focus:ring-pink-600/15 transition shadow-sm cursor-pointer"
             >
               <option value="" disabled className="text-slate-500">
-                Select launch timeframe...
+                Select timeframe...
               </option>
               {TIMEFRAME_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -569,7 +569,7 @@ export const StepInput: React.FC<StepInputProps> = ({
                 </option>
               ))}
             </select>
-            <span className="text-[10px] text-slate-500">Target sprint duration</span>
+            <span className="text-[10px] text-slate-500">Target launch timeline</span>
           </div>
 
           {/* Budget in Indian Rupees */}
@@ -577,7 +577,7 @@ export const StepInput: React.FC<StepInputProps> = ({
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
                 <IndianRupee className="w-3.5 h-3.5 text-cyan-600" />
-                Initial Budget &amp; Runway (in ₹ Rupees) *
+                Your Investment Budget (in ₹ Rupees) *
               </label>
               <span className="text-[10px] text-cyan-800 font-mono font-semibold px-2 py-0.5 rounded bg-cyan-100 border border-cyan-200">INR (Indian Rupee - ₹)</span>
             </div>
@@ -587,7 +587,7 @@ export const StepInput: React.FC<StepInputProps> = ({
                 required
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
-                placeholder="e.g. ₹5,00,000 Bootstrapped, ₹25,00,000 Seed Angel, ₹10 Lakhs..."
+                placeholder="e.g. ₹5,00,000, ₹10 Lakhs, ₹25 Lakhs..."
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/15 transition font-medium shadow-sm"
               />
               <IndianRupee className="w-4 h-4 text-cyan-600 absolute left-3 top-3 pointer-events-none" />
@@ -618,11 +618,11 @@ export const StepInput: React.FC<StepInputProps> = ({
               <div>
                 <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <Globe2 className="w-4 h-4 text-blue-600" />
-                  <span>Target Launch Hub: Belagavi (Belgaum), Karnataka</span>
+                  <span>City: Belagavi (Belgaum), Karnataka</span>
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 </label>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  Configured for Belagavi Tier-2 ecosystem with live Google Map competitor telemetry across the 4 key sectors.
+                  Local competitor information and market sizes mapped specifically for Belagavi.
                 </p>
               </div>
 
@@ -637,7 +637,7 @@ export const StepInput: React.FC<StepInputProps> = ({
                   }`}
                 >
                   <MapPin className="w-3.5 h-3.5" />
-                  <span>{showBelagaviMap ? "Hide Google Map" : "Show Belagavi Google Map"}</span>
+                  <span>{showBelagaviMap ? "Hide Map" : "View Belagavi Map"}</span>
                 </button>
               </div>
             </div>
@@ -647,9 +647,9 @@ export const StepInput: React.FC<StepInputProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-rose-600" />
-                  <span>Belagavi Specific Area / Locality *</span>
+                  <span>Select Your Area in Belagavi *</span>
                   <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-mono font-semibold">
-                    Launch Neighborhood
+                    Local Area
                   </span>
                 </label>
                 <span className="text-[11px] text-slate-500 font-medium">
@@ -808,12 +808,12 @@ export const StepInput: React.FC<StepInputProps> = ({
             {isLoading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Synthesizing Market &amp; Cloud Feasibility...</span>
+                <span>Finding Local Competitors &amp; Checking Market...</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 text-blue-200" />
-                <span>Generate Startup Validation &amp; Market Output</span>
+                <span>Check Competitors &amp; Market Potential</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

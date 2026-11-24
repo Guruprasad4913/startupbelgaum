@@ -65,14 +65,14 @@ export const Navigation: React.FC<NavigationProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg tracking-tight text-slate-900">
-                Startup<span className="text-blue-600 font-extrabold">Gen</span>
+                Belagavi<span className="text-blue-600 font-extrabold">Biz</span>
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200 shadow-sm">
-                Multi-Sector Validation
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-sm">
+                Belagavi Business Hub
               </span>
             </div>
             <p className="text-xs text-slate-500 hidden sm:block">
-              14-Stage Institutional Idea Validation Engine
+              Check Business Ideas, Local Competitors &amp; Market Potential in Belagavi
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 }`}
               >
                 <Zap className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Validator Flow</span>
+                <span className="hidden sm:inline">Idea Validator</span>
               </button>
             </div>
           )}

@@ -94,13 +94,13 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#243d78] text-xs font-semibold mb-2">
             <Activity className="w-3.5 h-3.5" />
-            Step 4 of 6: Feasibility, Revenue & AI Scoring Engine
+            Step 4 of 6: Business Feasibility &amp; Monthly Costs
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Viability Blueprint for <span className="text-[#243d78]">{idea.name}</span>
+            Practical Feasibility Check for <span className="text-[#243d78]">{idea.name}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-600">
-            Algorithmic viability scoring, cloud topology blueprints, unit economics simulator, and 2x2 risk matrix.
+            Overall business viability score, expected monthly revenue and expenses, and key risks to watch out for.
           </p>
         </div>
 
@@ -116,7 +116,7 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
             onClick={onNext}
             className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-semibold shadow-sm border border-[#12224d] transition flex items-center gap-2 cursor-pointer"
           >
-            <span>Proceed to MVP &amp; Business Roadmap</span>
+            <span>Next: Step-by-Step Launch Plan</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -221,7 +221,7 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
           }`}
         >
           <Award className="w-4 h-4 text-[#243d78]" />
-          1. AI Scoring Engine ({calculatedViabilityScore}/100)
+          1. Viability Scoring ({calculatedViabilityScore}/100)
         </button>
         <button
           onClick={() => setActiveTab("cloud")}
@@ -233,8 +233,8 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
         >
           <Cloud className="w-4 h-4 text-[#243d78]" />
           {idea.businessType && idea.businessType !== "Tech & Software"
-            ? "2. Operations & Systems Blueprint"
-            : "2. Technical Feasibility & Cloud Blueprint"}
+            ? "2. Operations & Setup Plan"
+            : "2. Technical & Setup Plan"}
         </button>
         <button
           onClick={() => setActiveTab("revenue")}
@@ -245,7 +245,7 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
           }`}
         >
           <IndianRupee className="w-4 h-4 text-[#243d78]" />
-          3. Revenue Model &amp; Runway Simulator
+          3. Monthly Revenue &amp; Cost Simulator
         </button>
         <button
           onClick={() => setActiveTab("risks")}
@@ -256,7 +256,7 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
           }`}
         >
           <AlertTriangle className="w-4 h-4 text-amber-600" />
-          4. 2x2 Risk Analysis Matrix
+          4. Key Risks &amp; Solutions
         </button>
       </div>
 

@@ -92,13 +92,13 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
         <div>
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-2 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            Step 2 of 6: AI Concept Selection
+            Step 2 of 6: Choose Your Business Idea
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            Select Your Startup Concept to Validate
+            Pick the Business Idea You Want to Check
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            Our AI engine generated {ideas.length} tailored opportunities. Choose one to perform deep real-time API market scans &amp; cloud blueprinting.
+            Here are practical, high-potential business concepts for Belagavi based on your sector. Click any card to select it and see its local competitors.
           </p>
         </div>
 
@@ -141,9 +141,9 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
           <Lightbulb className="w-4 h-4 text-amber-500" />
         </div>
         <div className="space-y-1 text-xs">
-          <span className="font-bold text-slate-900 block text-sm">How to Choose Your Concept</span>
+          <span className="font-bold text-slate-900 block text-sm">How to Choose Your Business Idea</span>
           <p className="text-slate-600 leading-relaxed">
-            Click any idea card below to review its problem statement, proposed solution, and initial viability score. The selected idea will be deep-validated across live market APIs, competitor battlecards, and cloud infrastructure.
+            Click any card below to see what problem it solves and how it works. Then click the button to see existing competitors and potential earnings in Belagavi.
           </p>
         </div>
       </div>
@@ -181,7 +181,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
               {/* Selected Badge */}
               {isSelected && (
                 <div className="absolute -top-3.5 right-5 px-3 py-1 rounded-full bg-[#243d78] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-md">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" /> Selected Concept
+                  <Check className="w-3.5 h-3.5 stroke-[3]" /> Selected Idea
                 </div>
               )}
 
@@ -199,14 +199,14 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
                     {idea.isNew && (
                       <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-sm flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
-                        Fresh Plan
+                        Fresh Idea
                       </span>
                     )}
                   </div>
                   {idea.initialFeasibilityScore && (
-                    <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-sm">
+                    <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-sm" title="Potential success score based on market demand">
                       <Zap className="w-3 h-3 text-emerald-600" />
-                      {idea.initialFeasibilityScore}/100
+                      Viability {idea.initialFeasibilityScore}/100
                     </span>
                   )}
                 </div>
@@ -223,11 +223,11 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
                 {/* Problem & Solution Mini */}
                 <div className="space-y-2.5 pt-3 border-t border-slate-200 text-xs">
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <span className="text-blue-700 font-bold block text-[10px] uppercase tracking-wider">Problem</span>
+                    <span className="text-blue-700 font-bold block text-[10px] uppercase tracking-wider">Customer Need / Problem</span>
                     <p className="text-slate-800 line-clamp-2 mt-0.5 leading-relaxed">{idea.problemStatement}</p>
                   </div>
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <span className="text-cyan-800 font-bold block text-[10px] uppercase tracking-wider">Solution Strategy</span>
+                    <span className="text-cyan-800 font-bold block text-[10px] uppercase tracking-wider">How This Business Works</span>
                     <p className="text-slate-800 line-clamp-2 mt-0.5 leading-relaxed">{idea.solution}</p>
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
                 {/* Target persona preview */}
                 <div className="pt-2 border-t border-slate-200 text-xs flex items-center gap-2 text-slate-500">
                   <Target className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                  <span className="truncate font-medium text-slate-800">{idea.targetPersona.title}</span>
+                  <span className="truncate font-medium text-slate-800">Who will buy: {idea.targetPersona.title}</span>
                 </div>
               </div>
 
@@ -265,17 +265,17 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">
-                  Alternative Angles &amp; Niches
+                  More Business Options
                 </span>
                 <span className="text-xs text-slate-500">
-                  {ideas.length} plans available
+                  {ideas.length} ideas available
                 </span>
               </div>
               <h4 className="text-base sm:text-lg font-bold text-slate-900">
-                Need a different plan than the {ideas.length <= 3 ? "3" : ideas.length} mentioned?
+                Want to see more business ideas?
               </h4>
               <p className="text-xs text-slate-600 max-w-xl leading-relaxed">
-                Looking for another angle, different target audience, or alternative business model? Click below to generate 3 more diverse plans tailored to your profile.
+                Looking for another angle, different target customers, or an alternative business model? Click below to generate 3 more ideas for your selected sector.
               </p>
             </div>
           </div>
@@ -288,7 +288,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
             className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm shadow-md border border-emerald-700 transition flex items-center justify-center gap-2 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${isGeneratingMore ? "animate-spin text-white" : ""}`} />
-            <span>{isGeneratingMore ? "Generating 3 More Plans..." : "Generate 3 More Plans"}</span>
+            <span>{isGeneratingMore ? "Generating 3 More Ideas..." : "Show 3 More Business Ideas"}</span>
           </button>
         </div>
       )}
@@ -301,7 +301,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider mb-2 border border-blue-200">
-                <Sparkles className="w-3 h-3 text-blue-600" /> Concept Blueprint Selected
+                <Sparkles className="w-3 h-3 text-blue-600" /> Selected Idea Overview
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{currentSelectedIdea.name}</h3>
               <p className="text-xs sm:text-sm text-slate-600 mt-0.5">{currentSelectedIdea.tagline}</p>
@@ -314,11 +314,11 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
               {isValidating ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Validating Market &amp; Cloud Blueprint...</span>
+                  <span>Checking Competitors &amp; Market Potential...</span>
                 </>
               ) : (
                 <>
-                  <span>Deep Validate This Concept</span>
+                  <span>Continue to Competitors &amp; Market Check</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -328,24 +328,24 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
               <span className="text-slate-600 font-semibold flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-blue-600" /> Target Buyer Persona
+                <Target className="w-3.5 h-3.5 text-blue-600" /> Who Will Buy / Target Customers
               </span>
               <p className="text-slate-900 font-semibold text-sm">{currentSelectedIdea.targetPersona.title}</p>
               <div className="text-slate-500 pt-1 border-t border-slate-200">
-                Willingness to Pay: <strong className="text-emerald-700 font-mono">{currentSelectedIdea.targetPersona.willingnessToPay}</strong>
+                Typical Spending: <strong className="text-emerald-700 font-mono">{currentSelectedIdea.targetPersona.willingnessToPay}</strong>
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
               <span className="text-slate-600 font-semibold flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-amber-600" /> Why Now / Timing Catalyst
+                <Clock className="w-3.5 h-3.5 text-amber-600" /> Why This is a Good Time to Start
               </span>
               <p className="text-slate-700 leading-relaxed">{currentSelectedIdea.whyNow}</p>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
               <span className="text-slate-600 font-semibold flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-indigo-600" /> Innovation Moat
+                <Shield className="w-3.5 h-3.5 text-indigo-600" /> Your Key Advantage (Why You Win)
               </span>
               <p className="text-slate-700 leading-relaxed">{currentSelectedIdea.innovationMoat}</p>
             </div>
@@ -363,8 +363,8 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
                   <PenTool className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight">Enter Custom Startup Concept</h3>
-                  <p className="text-[11px] text-slate-500">Add your bespoke venture idea into the AI validation funnel</p>
+                  <h3 className="text-base font-bold text-slate-900 tracking-tight">Enter Your Own Business Idea</h3>
+                  <p className="text-[11px] text-slate-500">Add your custom idea to check competitors and market demand</p>
                 </div>
               </div>
               <button
@@ -379,19 +379,19 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
             <form onSubmit={handleAddCustomIdea} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-800">Startup Name *</label>
+                  <label className="font-semibold text-slate-800">Business Name *</label>
                   <input
                     type="text"
                     required
                     value={customName}
                     onChange={(e) => setCustomName(e.target.value)}
-                    placeholder="e.g. LedgerPulse AI"
+                    placeholder="e.g. Belagavi Fresh Kitchen"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 shadow-sm transition"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-800">Domain / Sector (Belagavi 4 Core)</label>
+                  <label className="font-semibold text-slate-800">Sector</label>
                   <select
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
@@ -406,35 +406,35 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-slate-800">Tagline / One-Liner</label>
+                <label className="font-semibold text-slate-800">Short Summary / Tagline</label>
                 <input
                   type="text"
                   value={customTagline}
                   onChange={(e) => setCustomTagline(e.target.value)}
-                  placeholder="e.g. Specialty single-origin roastery, or sustainable bamboo packaging"
+                  placeholder="e.g. Pure vegetarian quick-service cafe with traditional filter coffee"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 shadow-sm transition"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-slate-800">Customer Problem Statement *</label>
+                <label className="font-semibold text-slate-800">What Customer Problem Are You Solving? *</label>
                 <textarea
                   rows={2}
                   required
                   value={customProblem}
                   onChange={(e) => setCustomProblem(e.target.value)}
-                  placeholder="What acute customer or market problem are you solving?"
+                  placeholder="e.g. Working professionals and college students lack clean, fast, affordable breakfast options nearby"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 shadow-sm transition resize-none leading-relaxed"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-slate-800">Business &amp; Value Solution *</label>
+                <label className="font-semibold text-slate-800">How Does Your Business Work? *</label>
                 <textarea
                   rows={2}
                   value={customSolution}
                   onChange={(e) => setCustomSolution(e.target.value)}
-                  placeholder="How does your product, service, or business model operate?"
+                  placeholder="e.g. Modern counter service, fresh daily ingredients, quick parcel packaging and seating for 20"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 shadow-sm transition resize-none leading-relaxed"
                 />
               </div>
@@ -451,7 +451,7 @@ export const StepIdeaSelection: React.FC<StepIdeaSelectionProps> = ({
                   type="submit"
                   className="px-6 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs font-semibold shadow-md border border-[#12224d] transition flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Add Concept
+                  <Plus className="w-3.5 h-3.5" /> Add Idea
                 </button>
               </div>
             </form>

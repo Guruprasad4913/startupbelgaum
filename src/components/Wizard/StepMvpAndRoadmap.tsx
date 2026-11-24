@@ -310,13 +310,13 @@ export const StepMvpAndRoadmap: React.FC<StepMvpAndRoadmapProps> = ({
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#243d78] text-xs font-semibold mb-2">
             <Rocket className="w-3.5 h-3.5" />
-            Step 5 of 6: MVP Recommendation &amp; 12-Month Business Roadmap
+            Step 5 of 6: Step-by-Step Launch Plan &amp; Roadmap
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Execution &amp; Launch Roadmap for <span className="text-[#243d78]">{idea.name}</span>
+            Execution &amp; Launch Plan for <span className="text-[#243d78]">{idea.name}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mt-1">
-            An actionable {timelineDaysText} MVP development plan, clear feature boundaries via MoSCoW, and a phased funding roadmap.
+            An actionable {timelineDaysText} step-by-step launch plan, core features needed for launch, and a phased growth roadmap.
           </p>
         </div>
 
@@ -361,7 +361,7 @@ export const StepMvpAndRoadmap: React.FC<StepMvpAndRoadmapProps> = ({
             onClick={onNext}
             className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-sm border border-[#12224d] transition flex items-center gap-2 cursor-pointer"
           >
-            <span>View Full Startup Report &amp; Vault</span>
+            <span>View Final Business Report</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -967,7 +967,7 @@ export const StepMvpAndRoadmap: React.FC<StepMvpAndRoadmapProps> = ({
               onClick={onNext}
               className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold border border-[#12224d] shadow-sm transition flex items-center gap-2 cursor-pointer"
             >
-              <span>Ready! View Final Institutional Dossier &amp; Vault</span>
+              <span>Ready! View Final Business Report</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

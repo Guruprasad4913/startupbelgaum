@@ -113,12 +113,12 @@ export const DossierExport: React.FC<DossierExportProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Institutional Venture Memorandum</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Belagavi Business Plan &amp; Summary Report</h2>
               <span className="text-[10px] uppercase font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 font-mono">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" /> 14-Stage Verified
+                <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified for Belagavi
               </span>
             </div>
-            <p className="text-xs text-slate-600 mt-0.5">Export, preserve in Cloud Vault, compare concepts, or download print-ready venture memo</p>
+            <p className="text-xs text-slate-600 mt-0.5">Download print-ready report, save to your dashboard, or share with partners</p>
           </div>
         </div>
 
@@ -207,7 +207,7 @@ export const DossierExport: React.FC<DossierExportProps> = ({
           <div className="space-y-2.5">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] font-mono font-bold text-[#243d78] uppercase tracking-widest bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
-                CONFIDENTIAL VENTURE MEMO
+                BELAGAVI BUSINESS PLAN
               </span>
               <span className="text-slate-300">·</span>
               <span className="text-xs text-slate-500 font-medium">{selectedIdea.domain}</span>
