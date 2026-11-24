@@ -304,7 +304,7 @@ export const StepMvpAndRoadmap: React.FC<StepMvpAndRoadmapProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-28">
+    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
       {/* Top Header & Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -777,55 +777,6 @@ export const StepMvpAndRoadmap: React.FC<StepMvpAndRoadmapProps> = ({
               ))}
             </div>
           </div>
-
-          {/* Sub-Tab Navigation Helper */}
-          <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={onBack}
-                className="px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm transition text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to Feasibility</span>
-              </button>
-
-              {onStartNewValidation && (
-                <button
-                  type="button"
-                  onClick={onStartNewValidation}
-                  className="px-3.5 py-2 rounded-xl bg-white text-[#243d78] border border-blue-200 hover:bg-blue-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  title="Start a new startup validation from Step 1"
-                >
-                  <PlusCircle className="w-3.5 h-3.5 text-[#243d78]" />
-                  <span>New Validation</span>
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("roadmap");
-                  window.scrollTo({ top: 300, behavior: "smooth" });
-                }}
-                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#243d78] border border-blue-200 hover:border-blue-300 shadow-sm transition text-xs font-semibold flex items-center gap-2 cursor-pointer"
-              >
-                <span>Next: Explore 12-Month Business Roadmap</span>
-                <ChevronRight className="w-4 h-4 text-[#243d78]" />
-              </button>
-
-              <button
-                type="button"
-                onClick={onNext}
-                className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold border border-[#12224d] shadow-sm transition flex items-center gap-2 cursor-pointer"
-              >
-                <span>View Full Startup Report &amp; Vault</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
@@ -933,101 +884,28 @@ export const StepMvpAndRoadmap: React.FC<StepMvpAndRoadmapProps> = ({
               ))}
             </div>
           </div>
-
-          {/* Sub-Tab Navigation Helper */}
-          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("mvp");
-                  window.scrollTo({ top: 300, behavior: "smooth" });
-                }}
-                className="px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm transition text-xs font-medium flex items-center gap-1.5 cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to MVP Sprint Plan</span>
-              </button>
-
-              {onStartNewValidation && (
-                <button
-                  type="button"
-                  onClick={onStartNewValidation}
-                  className="px-3.5 py-2 rounded-xl bg-white text-[#243d78] border border-blue-200 hover:bg-blue-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  title="Start a new startup validation from Step 1"
-                >
-                  <PlusCircle className="w-3.5 h-3.5 text-[#243d78]" />
-                  <span>New Validation</span>
-                </button>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={onNext}
-              className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold border border-[#12224d] shadow-sm transition flex items-center gap-2 cursor-pointer"
-            >
-              <span>Ready! View Final Business Report</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       )}
 
-      {/* Floating Sticky Bottom Action Bar - Always accessible without scrolling! */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Feasibility</span>
-            <span className="sm:hidden">Back</span>
-          </button>
+      {/* Unified Standard Bottom Navigation */}
+      <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Feasibility</span>
+        </button>
 
-          {/* Quick Subtab Switcher right on the floating bar! */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("mvp");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === "mvp"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              1. Launch Plan ({timelineDaysText})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("roadmap");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === "roadmap"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              2. 12-Month Roadmap
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={onNext}
-            className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-md border border-[#12224d] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer flex-shrink-0"
-          >
-            <span>View Final Report</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          className="px-6 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-md border border-[#12224d] transition flex items-center gap-2 cursor-pointer"
+        >
+          <span>Ready! View Final Business Report</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

@@ -88,7 +88,7 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-28">
+    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
       {/* Step Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -762,88 +762,25 @@ export const StepCloudFeasibility: React.FC<StepCloudFeasibilityProps> = ({
         </div>
       )}
 
-      {/* Floating Sticky Bottom Action Bar - Always accessible without scrolling! */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Competitors</span>
-            <span className="sm:hidden">Back</span>
-          </button>
+      {/* Unified Standard Bottom Navigation */}
+      <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Competitors</span>
+        </button>
 
-          {/* Quick Subtab Switcher right on the floating bar! */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs overflow-x-auto max-w-[50%] sm:max-w-none">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("scoring");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                activeTab === "scoring"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              1. Viability ({calculatedViabilityScore}/100)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("cloud");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                activeTab === "cloud"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              2. Setup Plan
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("revenue");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                activeTab === "revenue"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              3. Revenue &amp; Costs
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("risks");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                activeTab === "risks"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              4. Risks
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={onNext}
-            className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-md border border-[#12224d] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer flex-shrink-0"
-          >
-            <span>Next: Launch Plan</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          className="px-6 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-md border border-[#12224d] transition flex items-center gap-2 cursor-pointer"
+        >
+          <span>Next: Step-by-Step Launch Plan</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

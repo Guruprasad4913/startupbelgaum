@@ -215,7 +215,7 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
   }, [competitorComparisonMatrix, displayedCompetitors, activeSector, detectedSector]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-28">
+    <div className="w-full max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
       {/* Top Header & Action Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -732,21 +732,6 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Tab Navigation Footer Helper */}
-          <div className="pt-4 border-t border-slate-200 flex justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("competitors");
-                window.scrollTo({ top: 300, behavior: "smooth" });
-              }}
-              className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#243d78] border border-slate-300 shadow-sm hover:border-[#243d78] transition text-xs font-semibold flex items-center gap-2 cursor-pointer"
-            >
-              <span>Next: Explore Competitor Battlecard &amp; Moat</span>
-              <ChevronRight className="w-4 h-4 text-[#243d78]" />
-            </button>
           </div>
         </div>
       )}
@@ -1390,42 +1375,6 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
               </div>
             );
           })()}
-
-          {/* Tab Navigation Footer Helper */}
-          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <button
-              type="button"
-              onClick={onBack}
-              className="px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-medium flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Choose Idea</span>
-            </button>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("market");
-                  window.scrollTo({ top: 300, behavior: "smooth" });
-                }}
-                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#243d78] border border-slate-300 hover:border-[#243d78] shadow-sm transition text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>View Market Demand &amp; Earnings</span>
-                <ChevronRight className="w-4 h-4 text-[#243d78]" />
-              </button>
-
-              <button
-                type="button"
-                onClick={onNext}
-                disabled={isEvaluatingCloud}
-                className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-sm border border-[#12224d] transition flex items-center gap-2 cursor-pointer"
-              >
-                <span>Next: Practical Feasibility</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
@@ -1630,111 +1579,38 @@ export const StepMarketValidation: React.FC<StepMarketValidationProps> = ({
             </div>
           </div>
 
-          {/* Bottom Action Helper */}
-          <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("competitors");
-                window.scrollTo({ top: 300, behavior: "smooth" });
-              }}
-              className="px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-medium flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Competitors</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onNext}
-              disabled={isEvaluatingCloud}
-              className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-sm border border-[#12224d] transition flex items-center gap-2 cursor-pointer"
-            >
-              <span>Next: Check Business Feasibility &amp; Monthly Costs</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       )}
 
-      {/* Floating Sticky Bottom Action Bar - Always accessible so you never have to scroll down to click Next or Back! */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] py-3 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Choose Idea</span>
-            <span className="sm:hidden">Back</span>
-          </button>
+      {/* Unified Standard Bottom Navigation */}
+      <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2.5 rounded-xl bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Choose Idea</span>
+        </button>
 
-          {/* Quick Subtab Switcher right on the floating bar! */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("competitors");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === "competitors"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              📍 Competitors ({displayedCompetitors.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("market");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === "market"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              💰 Market Demand
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("users");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                activeTab === "users"
-                  ? "bg-[#243d78] text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-              }`}
-            >
-              👥 Customers
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={onNext}
-            disabled={isEvaluatingCloud}
-            className="px-5 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-md border border-[#12224d] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer disabled:opacity-50"
-          >
-            {isEvaluatingCloud ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Checking...</span>
-              </>
-            ) : (
-              <>
-                <span>Next: Feasibility</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={isEvaluatingCloud}
+          className="px-6 py-2.5 rounded-xl bg-[#243d78] hover:bg-[#1a2d5a] text-white text-xs sm:text-sm font-bold shadow-md border border-[#12224d] transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+        >
+          {isEvaluatingCloud ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Checking Feasibility...</span>
+            </>
+          ) : (
+            <>
+              <span>Next: Practical Feasibility</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
